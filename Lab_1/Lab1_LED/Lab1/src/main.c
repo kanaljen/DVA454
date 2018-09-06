@@ -95,28 +95,30 @@ int main (void)
 		//Event 1
 		if(!button_state0){
 			for(i = 0; i <= 10; i++){
-				AVR32_GPIO.port[LED0_PORT].ovrs = LED0_BIT_VALUE;
-				mdelay(300);
-				AVR32_GPIO.port[LED0_PORT].ovrc = LED0_BIT_VALUE;
+				AVR32_GPIO.port[LED0_PORT].ovrt = LED0_BIT_VALUE;
 				mdelay(300);
 			}
+			AVR32_GPIO.port[LED0_PORT].ovrs = LED0_BIT_VALUE;
 		}
+		
 		//Event 2
-		if(button_state1){
-			AVR32_GPIO.port[LED1_PORT].ovrs = LED1_BIT_VALUE;
-		}
 		if(!button_state1){
-			AVR32_GPIO.port[LED1_PORT].ovrc = LED1_BIT_VALUE;
+			AVR32_GPIO.port[LED1_PORT].ovrt = LED1_BIT_VALUE;
+			
+			while(!button_state1){	
+				button_state1 = button_port1->pvr & BUTTON_PIN1;
+			}
+			AVR32_GPIO.port[LED1_PORT].ovrt = LED1_BIT_VALUE;
 		}
 		
 		//Event 3
 		if(!button_state2){
 			AVR32_GPIO.port[LED2_PORT].ovrt = LED2_BIT_VALUE;
+			
 			while(!button_state2){
 				button_state2 = button_port2->pvr & BUTTON_PIN2;
 			}
 		}
 		
 	}
-	while(1);
 }

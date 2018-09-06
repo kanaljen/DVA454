@@ -5,7 +5,7 @@ Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
   0 .reset        00002008  80000000  80000000  00000400  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .text         00000180  80002008  80002008  00002408  2**2
+  1 .text         0000018c  80002008  80002008  00002408  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
   2 .exception    00000200  80002200  80002200  00002600  2**9
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
@@ -27,19 +27,19 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
  11 .debug_abbrev 0000036b  00000000  00000000  00003641  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_line   00000fe8  00000000  00000000  000039ac  2**0
+ 12 .debug_line   00000fe9  00000000  00000000  000039ac  2**0
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_frame  000000dc  00000000  00000000  00004994  2**2
+ 13 .debug_frame  000000dc  00000000  00000000  00004998  2**2
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_str    0000062c  00000000  00000000  00004a70  2**0
+ 14 .debug_str    0000062c  00000000  00000000  00004a74  2**0
                   CONTENTS, READONLY, DEBUGGING
- 15 .debug_loc    0000024c  00000000  00000000  0000509c  2**0
+ 15 .debug_loc    00000263  00000000  00000000  000050a0  2**0
                   CONTENTS, READONLY, DEBUGGING
- 16 .debug_macinfo 001dc105  00000000  00000000  000052e8  2**0
+ 16 .debug_macinfo 001dc105  00000000  00000000  00005303  2**0
                   CONTENTS, READONLY, DEBUGGING
  17 .stack        00001000  0000f000  0000f000  00000000  2**0
                   ALLOC
- 18 .debug_ranges 00000098  00000000  00000000  001e13f0  2**3
+ 18 .debug_ranges 00000098  00000000  00000000  001e1408  2**3
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .reset:
@@ -189,7 +189,7 @@ int main (void)
 	int i;
 	
 	initLED ();
-800020d4:	f0 1f 00 2b 	mcall	80002180 <main+0xb0>
+800020d4:	f0 1f 00 2e 	mcall	8000218c <main+0xbc>
 	volatile int button_state2;
 	volatile avr32_gpio_port_t * button_port2;
 	button_port0 = &AVR32_GPIO.port[BUTTON_PORT2];
@@ -216,7 +216,7 @@ int main (void)
 	
 	while(1) {
 		button_state0 = button_port0->pvr & BUTTON_PIN0;
-800020fa:	10 92       	mov	r2,r8
+800020fa:	10 96       	mov	r6,r8
 		button_state1 = button_port1->pvr & BUTTON_PIN1;
 		button_state2 = button_port2->pvr & BUTTON_PIN2;
 		
@@ -224,34 +224,34 @@ int main (void)
 		if(!button_state0){
 800020fc:	30 00       	mov	r0,0
 			for(i = 0; i <= 10; i++){
-				AVR32_GPIO.port[LED0_PORT].ovrs = LED0_BIT_VALUE;
-800020fe:	fe 76 10 00 	mov	r6,-61440
-80002102:	fc 14 08 00 	movh	r4,0x800
-80002106:	08 93       	mov	r3,r4
+				AVR32_GPIO.port[LED0_PORT].ovrt = LED0_BIT_VALUE;
+800020fe:	fe 75 10 00 	mov	r5,-61440
+80002102:	fc 11 08 00 	movh	r1,0x800
+80002106:	02 94       	mov	r4,r1
 				mdelay(300);
-80002108:	e0 65 01 2c 	mov	r5,300
-				mdelay(300);
-			}
+80002108:	e0 63 01 2c 	mov	r3,300
+			AVR32_GPIO.port[LED0_PORT].ovrs = LED0_BIT_VALUE;
 		}
+		
 		//Event 2
-		if(button_state1){
-			AVR32_GPIO.port[LED1_PORT].ovrs = LED1_BIT_VALUE;
-8000210c:	fc 11 10 00 	movh	r1,0x1000
+		if(!button_state1){
+			AVR32_GPIO.port[LED1_PORT].ovrt = LED1_BIT_VALUE;
+8000210c:	fc 12 10 00 	movh	r2,0x1000
 	button_port2 = &AVR32_GPIO.port[BUTTON_PORT2];
 	button_port2->gpers = BUTTON_PIN2;
 	button_port2->oderc = BUTTON_PIN2;
 	
 	while(1) {
 		button_state0 = button_port0->pvr & BUTTON_PIN0;
-80002110:	65 88       	ld.w	r8,r2[0x60]
+80002110:	6d 88       	ld.w	r8,r6[0x60]
 80002112:	e6 18 01 00 	andh	r8,0x100,COH
 80002116:	50 28       	stdsp	sp[0x8],r8
 		button_state1 = button_port1->pvr & BUTTON_PIN1;
-80002118:	65 88       	ld.w	r8,r2[0x60]
+80002118:	6d 88       	ld.w	r8,r6[0x60]
 8000211a:	e6 18 00 20 	andh	r8,0x20,COH
 8000211e:	50 18       	stdsp	sp[0x4],r8
 		button_state2 = button_port2->pvr & BUTTON_PIN2;
-80002120:	65 88       	ld.w	r8,r2[0x60]
+80002120:	6d 88       	ld.w	r8,r6[0x60]
 80002122:	e6 18 00 04 	andh	r8,0x4,COH
 80002126:	50 08       	stdsp	sp[0x0],r8
 		
@@ -259,77 +259,93 @@ int main (void)
 		if(!button_state0){
 80002128:	40 28       	lddsp	r8,sp[0x8]
 8000212a:	58 08       	cp.w	r8,0
-8000212c:	c0 f1       	brne	8000214a <main+0x7a>
+8000212c:	c0 c1       	brne	80002144 <main+0x74>
 8000212e:	00 97       	mov	r7,r0
 			for(i = 0; i <= 10; i++){
-				AVR32_GPIO.port[LED0_PORT].ovrs = LED0_BIT_VALUE;
-80002130:	ed 43 01 54 	st.w	r6[340],r3
+				AVR32_GPIO.port[LED0_PORT].ovrt = LED0_BIT_VALUE;
+80002130:	eb 44 01 5c 	st.w	r5[348],r4
 				mdelay(300);
-80002134:	0a 9c       	mov	r12,r5
-80002136:	f0 1f 00 14 	mcall	80002184 <main+0xb4>
-				AVR32_GPIO.port[LED0_PORT].ovrc = LED0_BIT_VALUE;
-8000213a:	ed 44 01 58 	st.w	r6[344],r4
-				mdelay(300);
-8000213e:	0a 9c       	mov	r12,r5
-80002140:	f0 1f 00 11 	mcall	80002184 <main+0xb4>
+80002134:	06 9c       	mov	r12,r3
+80002136:	f0 1f 00 17 	mcall	80002190 <main+0xc0>
 		button_state1 = button_port1->pvr & BUTTON_PIN1;
 		button_state2 = button_port2->pvr & BUTTON_PIN2;
 		
 		//Event 1
 		if(!button_state0){
 			for(i = 0; i <= 10; i++){
-80002144:	2f f7       	sub	r7,-1
-80002146:	58 b7       	cp.w	r7,11
-80002148:	cf 41       	brne	80002130 <main+0x60>
-				AVR32_GPIO.port[LED0_PORT].ovrc = LED0_BIT_VALUE;
+8000213a:	2f f7       	sub	r7,-1
+8000213c:	58 b7       	cp.w	r7,11
+8000213e:	cf 91       	brne	80002130 <main+0x60>
+				AVR32_GPIO.port[LED0_PORT].ovrt = LED0_BIT_VALUE;
 				mdelay(300);
 			}
+			AVR32_GPIO.port[LED0_PORT].ovrs = LED0_BIT_VALUE;
+80002140:	eb 41 01 54 	st.w	r5[340],r1
 		}
+		
 		//Event 2
-		if(button_state1){
-8000214a:	40 18       	lddsp	r8,sp[0x4]
-			AVR32_GPIO.port[LED1_PORT].ovrs = LED1_BIT_VALUE;
-8000214c:	58 08       	cp.w	r8,0
-8000214e:	ed f1 1a 55 	st.wne	r6[0x154],r1
-		}
 		if(!button_state1){
-80002152:	40 18       	lddsp	r8,sp[0x4]
-			AVR32_GPIO.port[LED1_PORT].ovrc = LED1_BIT_VALUE;
-80002154:	58 08       	cp.w	r8,0
-80002156:	ed f1 0a 56 	st.weq	r6[0x158],r1
+80002144:	40 18       	lddsp	r8,sp[0x4]
+80002146:	58 08       	cp.w	r8,0
+80002148:	c0 f1       	brne	80002166 <main+0x96>
+			AVR32_GPIO.port[LED1_PORT].ovrt = LED1_BIT_VALUE;
+8000214a:	eb 42 01 5c 	st.w	r5[348],r2
+			
+			while(!button_state1){	
+8000214e:	40 18       	lddsp	r8,sp[0x4]
+80002150:	58 08       	cp.w	r8,0
+80002152:	c0 81       	brne	80002162 <main+0x92>
+				button_state1 = button_port1->pvr & BUTTON_PIN1;
+80002154:	6d 88       	ld.w	r8,r6[0x60]
+80002156:	e6 18 00 20 	andh	r8,0x20,COH
+8000215a:	50 18       	stdsp	sp[0x4],r8
+		
+		//Event 2
+		if(!button_state1){
+			AVR32_GPIO.port[LED1_PORT].ovrt = LED1_BIT_VALUE;
+			
+			while(!button_state1){	
+8000215c:	40 18       	lddsp	r8,sp[0x4]
+8000215e:	58 08       	cp.w	r8,0
+80002160:	cf a0       	breq	80002154 <main+0x84>
+				button_state1 = button_port1->pvr & BUTTON_PIN1;
+			}
+			AVR32_GPIO.port[LED1_PORT].ovrt = LED1_BIT_VALUE;
+80002162:	eb 42 01 5c 	st.w	r5[348],r2
 		}
 		
 		//Event 3
 		if(!button_state2){
-8000215a:	40 08       	lddsp	r8,sp[0x0]
-8000215c:	58 08       	cp.w	r8,0
-8000215e:	cd 91       	brne	80002110 <main+0x40>
+80002166:	40 08       	lddsp	r8,sp[0x0]
+80002168:	58 08       	cp.w	r8,0
+8000216a:	cd 31       	brne	80002110 <main+0x40>
 			AVR32_GPIO.port[LED2_PORT].ovrt = LED2_BIT_VALUE;
-80002160:	fc 18 20 00 	movh	r8,0x2000
-80002164:	ed 48 01 5c 	st.w	r6[348],r8
+8000216c:	fc 18 20 00 	movh	r8,0x2000
+80002170:	eb 48 01 5c 	st.w	r5[348],r8
+			
 			while(!button_state2){
-80002168:	40 08       	lddsp	r8,sp[0x0]
-8000216a:	58 08       	cp.w	r8,0
-8000216c:	cd 21       	brne	80002110 <main+0x40>
+80002174:	40 08       	lddsp	r8,sp[0x0]
+80002176:	58 08       	cp.w	r8,0
+80002178:	cc c1       	brne	80002110 <main+0x40>
 				button_state2 = button_port2->pvr & BUTTON_PIN2;
-8000216e:	65 88       	ld.w	r8,r2[0x60]
-80002170:	e6 18 00 04 	andh	r8,0x4,COH
-80002174:	50 08       	stdsp	sp[0x0],r8
-		}
+8000217a:	6d 88       	ld.w	r8,r6[0x60]
+8000217c:	e6 18 00 04 	andh	r8,0x4,COH
+80002180:	50 08       	stdsp	sp[0x0],r8
 		
 		//Event 3
 		if(!button_state2){
 			AVR32_GPIO.port[LED2_PORT].ovrt = LED2_BIT_VALUE;
+			
 			while(!button_state2){
-80002176:	40 08       	lddsp	r8,sp[0x0]
-80002178:	58 08       	cp.w	r8,0
-8000217a:	cc b1       	brne	80002110 <main+0x40>
-8000217c:	cf 9b       	rjmp	8000216e <main+0x9e>
-8000217e:	00 00       	add	r0,r0
-80002180:	80 00       	ld.sh	r0,r0[0x0]
-80002182:	20 9e       	sub	lr,9
-80002184:	80 00       	ld.sh	r0,r0[0x0]
-80002186:	20 7c       	sub	r12,7
+80002182:	40 08       	lddsp	r8,sp[0x0]
+80002184:	58 08       	cp.w	r8,0
+80002186:	cc 51       	brne	80002110 <main+0x40>
+80002188:	cf 9b       	rjmp	8000217a <main+0xaa>
+8000218a:	00 00       	add	r0,r0
+8000218c:	80 00       	ld.sh	r0,r0[0x0]
+8000218e:	20 9e       	sub	lr,9
+80002190:	80 00       	ld.sh	r0,r0[0x0]
+80002192:	20 7c       	sub	r12,7
 
 Disassembly of section .exception:
 

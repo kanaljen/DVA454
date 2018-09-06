@@ -317,7 +317,7 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
 .plt
  *(.plt)
 
-.text           0x80002008      0x180
+.text           0x80002008      0x18c
  *(.text .stub .text.* .gnu.linkonce.t.*)
  .text._get_interrupt_handler
                 0x80002008       0x38 src/ASF/avr32/drivers/intc/intc.o
@@ -330,7 +330,7 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
  .text.initLED  0x8000209e       0x30 src/main.o
                 0x8000209e                initLED
  *fill*         0x800020ce        0x2 d703d703
- .text.main     0x800020d0       0xb8 src/main.o
+ .text.main     0x800020d0       0xc4 src/main.o
                 0x800020d0                main
  *(.text.*personality*)
  *(.gnu.warning)
@@ -581,13 +581,13 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
  .debug_abbrev  0x000001fa       0x14 src/ASF/avr32/utils/startup/trampoline_uc3.o
  .debug_abbrev  0x0000020e      0x15d src/main.o
 
-.debug_line     0x00000000      0xfe8
+.debug_line     0x00000000      0xfe9
  *(.debug_line)
  .debug_line    0x00000000      0x109 src/ASF/avr32/drivers/intc/exception.o
  .debug_line    0x00000109      0x695 src/ASF/avr32/drivers/intc/intc.o
  .debug_line    0x0000079e       0xf2 src/ASF/avr32/utils/startup/startup_uc3.o
  .debug_line    0x00000890       0x67 src/ASF/avr32/utils/startup/trampoline_uc3.o
- .debug_line    0x000008f7      0x6f1 src/main.o
+ .debug_line    0x000008f7      0x6f2 src/main.o
 
 .debug_frame    0x00000000       0xdc
  *(.debug_frame)
@@ -601,10 +601,10 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
  .debug_str     0x00000436      0x1f6 src/main.o
                                 0x2a3 (size before relaxing)
 
-.debug_loc      0x00000000      0x24c
+.debug_loc      0x00000000      0x263
  *(.debug_loc)
  .debug_loc     0x00000000       0xd3 src/ASF/avr32/drivers/intc/intc.o
- .debug_loc     0x000000d3      0x179 src/main.o
+ .debug_loc     0x000000d3      0x190 src/main.o
 
 .debug_macinfo  0x00000000   0x1dc105
  *(.debug_macinfo)
