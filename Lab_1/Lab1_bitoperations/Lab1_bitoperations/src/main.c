@@ -17,7 +17,7 @@ int main(void)
 	/* Bitwise AND */
 	op1 = 0x01;
 	op2 = 0x03;
-	result = op1 & op2;
+	result = op1 & op2; //0000 0011 AND 0000 0001 (1) -> 0000 0001 (1)
 
 	/* Bitwise AND, a variant */
 	/* This is standard C and works much like the short form of
@@ -27,29 +27,29 @@ int main(void)
 	 */
 	op1 = 0x03;
 	result = 0x07;
-	result &= op1;	/* result = result & op2 */
+	result &= op1;	/* result = result & op2 */ // 0000 0111 (7) AND 0000 0011 (3) -> 0000 0011 (3)
 
 	/* Bitwise OR */
 	op1 = 0x01;
 	op2 = 0x03;
-	result = op1 | op2;
+	result = op1 | op2; //0000 0001 or 0000 0011 (3) -> 0000 0011 (3)
 
 	/* Bitwise XOR */
 	op1 = 0x01;
 	op2 = 0x03;
-	result = op1 ^ op2;
+	result = op1 ^ op2; //0000 0001 xor 0000 0011 (3) -> 0000 0010 (2)
 
 	/* Bitwise NOT */
 	op1 = 0x01;
-	result = ~op1 ;
+	result = ~op1 ;  // 0000 0001 (1) -> 1111 1110 (254)
 
 	/* Bitwise LEFT SHIFT */
 	op1 = 0x02;
-	result = (op1 >> 1);
+	result = (op1 >> 1); //0000 0010 (2) -> 0000 0001 (1)
 
 	/* Bitwise LEFT SHIFT again */
 	op1 = 0x80;
-	result = (op1 >> 4);
+	result = (op1 >> 4); // 1000 0000 (128) -> 0000 1000 (8)
 
 	/* Bitwise RIGHT SHIFT */
 	op1 = 0x01;

@@ -125,13 +125,7 @@ int main (void)
 			mdelay(500);
 			AVR32_GPIO.port[LED1_PORT].ovrt = LED1_BIT_VALUE;
 			AVR32_GPIO.port[LED2_PORT].ovrt = LED2_BIT_VALUE;
-			mdelay(500);
-			AVR32_GPIO.port[LED2_PORT].ovrt = LED2_BIT_VALUE;
-			AVR32_GPIO.port[LED3_PORT].ovrt = LED3_BIT_VALUE;
 
-			mdelay(500);
-			AVR32_GPIO.port[LED3_PORT].ovrt = LED3_BIT_VALUE;
-			AVR32_GPIO.port[LED2_PORT].ovrt = LED2_BIT_VALUE;
 			mdelay(500);
 			AVR32_GPIO.port[LED2_PORT].ovrt = LED2_BIT_VALUE;
 			AVR32_GPIO.port[LED1_PORT].ovrt = LED1_BIT_VALUE;
