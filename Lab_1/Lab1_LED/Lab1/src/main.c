@@ -36,6 +36,7 @@ void mdelay(int ms){
 }
 void initButton(void)
 {
+	AVR32_USART0.port[BUTTON_PORT0].gpers = BUTTON_PIN0;
 	AVR32_GPIO.port[BUTTON_PORT0].gpers = BUTTON_PIN0;
 	AVR32_GPIO.port[BUTTON_PORT0].oderc = BUTTON_PIN0;
 	
