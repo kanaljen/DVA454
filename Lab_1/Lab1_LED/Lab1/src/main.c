@@ -22,20 +22,15 @@
 #define LED2_PIN ( LED2_GPIO & ( GPIO_MAX_PIN_NUMBER -1))
 #define LED2_BIT_VALUE (1 << LED2_PIN )
 
-//Define LED 3
-#define LED3_PORT ( LED3_GPIO / GPIO_MAX_PIN_NUMBER )
-#define LED3_PIN ( LED3_GPIO & ( GPIO_MAX_PIN_NUMBER -1))
-#define LED3_BIT_VALUE (1 << LED3_PIN )
-
 //Define button 0
 #define BUTTON_PORT0 (GPIO_PUSH_BUTTON_0 >> 5)
 #define BUTTON_PIN0 (1 << (GPIO_PUSH_BUTTON_0 & 0x1f))
 
-//Define button 0
+//Define button 1
 #define BUTTON_PORT1 (GPIO_PUSH_BUTTON_1 >> 5)
 #define BUTTON_PIN1 (1 << (GPIO_PUSH_BUTTON_1 & 0x1f))
 
-//Define button 0
+//Define button 2
 #define BUTTON_PORT2 (GPIO_PUSH_BUTTON_2 >> 5)
 #define BUTTON_PIN2 (1 << (GPIO_PUSH_BUTTON_2 & 0x1f))
 
@@ -45,20 +40,6 @@ void mdelay(int ms){
 	while (cycles != 0){
 		cycles--;
 	}
-}
-
-//Initialize buttons
-void initButton(void)
-{
-//	AVR32_USART0.port[BUTTON_PORT0].gpers = BUTTON_PIN0;
-	AVR32_GPIO.port[BUTTON_PORT0].gpers = BUTTON_PIN0;
-	AVR32_GPIO.port[BUTTON_PORT0].oderc = BUTTON_PIN0;
-	
-	AVR32_GPIO.port[BUTTON_PORT1].gpers = BUTTON_PIN1;
-	AVR32_GPIO.port[BUTTON_PORT1].oderc = BUTTON_PIN1;
-	
-	AVR32_GPIO.port[BUTTON_PORT2].gpers = BUTTON_PIN2;
-	AVR32_GPIO.port[BUTTON_PORT2].oderc = BUTTON_PIN2;
 }
 
 //Initialize LEDs
@@ -85,7 +66,6 @@ void initLED (void)
 int main (void)
 {
 	initLED (); //Initialize LED function
-	//initButton();
 
 	volatile int button_state0; //Initialize button state 0
 	volatile int button_state1; //Initialize button state 1
