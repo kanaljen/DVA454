@@ -4,7 +4,7 @@
 //Define clock
 #define CYCLES_PER_MS (115/11)
 
-//Define pins
+//Define number of pins
 #define GPIO_MAX_PIN_NUMBER 32
 
 //Define LED 0
@@ -50,7 +50,7 @@ void mdelay(int ms){
 //Initialize buttons
 void initButton(void)
 {
-	AVR32_USART0.port[BUTTON_PORT0].gpers = BUTTON_PIN0;
+//	AVR32_USART0.port[BUTTON_PORT0].gpers = BUTTON_PIN0;
 	AVR32_GPIO.port[BUTTON_PORT0].gpers = BUTTON_PIN0;
 	AVR32_GPIO.port[BUTTON_PORT0].oderc = BUTTON_PIN0;
 	
@@ -114,8 +114,8 @@ int main (void)
 			count++; //Count for "Event 4"
 			
 			//Internal loop for when the button is pressed. To not make the led blink. Exits when released
-			while(!button_state2){
-				button_state2 = AVR32_GPIO.port[BUTTON_PORT2].pvr & BUTTON_PIN2; //Read Button 2
+			while(!button_state1){
+				button_state1 = AVR32_GPIO.port[BUTTON_PORT1].pvr & BUTTON_PIN1; //Read Button 1
 			}
 			AVR32_GPIO.port[LED1_PORT].ovrt = LED1_BIT_VALUE; //Toggle LED 1
 		}
