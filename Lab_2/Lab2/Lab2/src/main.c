@@ -1,9 +1,6 @@
 #include "compiler.h"
 #include "board.h"
-#include "headers.h"
-#include "functions.c"
-#include "avr32\usart_400.h"
-#include "avr32\uc3a0512.h"
+#include "functions.h"
 
 int main(void)
 {

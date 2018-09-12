@@ -65,6 +65,9 @@
 // From module: Generic board support
 #include <board.h>
 
+// From module: INTC - Interrupt Controller
+#include <intc.h>
+
 // From module: Interrupt management - UC3 implementation
 #include <interrupt.h>
 
