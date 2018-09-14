@@ -1,6 +1,7 @@
 #include "avr32\usart_400.h"
 #include "avr32\uc3a0512.h"
 
+
 #define max_bit_number 31
 
 #ifndef FUNCTIONS_H_
