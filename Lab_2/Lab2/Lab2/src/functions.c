@@ -36,7 +36,7 @@ void USART_init(volatile avr32_usart_t * usart)
 	usart->CR.sttbrk = 0;  //Start Break
 	usart->CR.stpbrk = 0;  //Stop Break 
 	usart->CR.sttto = 0;   //Start time-out 
-	usart->CR.senda = 0;   //Send address (In Multidrop mode only) (0)
+	usart->CR.senda = 0;   //Send address (In Multi drop mode only) (0)
 	usart->CR.rstit = 0;   //Reset Iterations (ISO7816 must be enabled) (0)
 	usart->CR.retto = 0;   //Restart time-out (0)
 	usart->CR.rtsen = 0;   //Request to send Enable 0
@@ -110,18 +110,16 @@ char USART_getChar()
 	volatile avr32_usart_t *usart = &AVR32_USART1;
 	char RX_HOLD;
 	
-	//while(!usart->CSR.rxrdy);
+	while(!usart->CSR.rxrdy);
 	if(!usart->RHR.rxsynh)
 	{
 		RX_HOLD = usart->RHR.rxchr; 
 	}
-	
 	return RX_HOLD;
 }
-
 void USART_putChar(char c)
 {
 	volatile avr32_usart_t *usart = &AVR32_USART1;
-	usart->THR.txchr = c;
-	
+	while(!usart->CSR.txrdy); //The transmitter reports to CSR txrdy = 1 which indicates that THR is empty and TXEMPTY is 0
+	usart->THR.txchr = c; //Receive whatever data is in the transmit holding register THR
 }
