@@ -5,16 +5,19 @@
 
 void USART_reset(volatile avr32_usart_t *usart)
 {
+	//Reset
 	usart->CR.rstrx = 1;   //Resets the receiver (1)
 	usart->CR.rsttx = 1;   //Resets the transmitter (1)
 	usart->CR.rststa = 1;  //Resets status bits (1)
-	usart->CR.rstnack = 1; //Reset non acknowledge
-		
-	usart->CR.rstrx = 0;   //Resets the receiver (1)
-	usart->CR.rsttx = 0;   //Resets the transmitter (1)
-	usart->CR.rststa = 0;  //Resets status bits (1)
-	usart->CR.rstnack = 0; //Reset non acknowledge
+	usart->CR.rstnack = 1; //Reset non acknowledge (0)
 	
+	//"reset" the reset
+	usart->CR.rstrx = 0;   //Resets the receiver (0)
+	usart->CR.rsttx = 0;   //Resets the transmitter (0)
+	usart->CR.rststa = 0;  //Resets status bits (0)
+	usart->CR.rstnack = 0; //Reset non acknowledge (0)
+	
+	//reenables receiver and transmitter
 	usart->CR.rxdis = 0;   //Should be 0 to NOT disable receiver (0)
 	usart->CR.rxen =  1;   //Enables receiver (1)
 	usart->CR.txdis = 0;   //Should be 0 to NOT disable transmitter (0)
@@ -48,13 +51,13 @@ void USART_init(volatile avr32_usart_t * usart)
 	usart->MR.chrl = 3;          //Character length (8 bit)
 	usart->MR.sync = 0;          //Synchronous mode select, async selected
 	usart->MR.par = 4;           //Parity type (No parity)
-	usart->MR.nbstop = 0;        //Number of stop bits
-	usart->MR.chmode = 0;        //Channel mode
+	usart->MR.nbstop = 0;        //Number of stop bits (1 stop bit)
+	usart->MR.chmode = 0;        //Channel mode (normal)
 	usart->MR.msbf = 0;          //Bit order
 	usart->MR.mode9 = 0;         //9-bit character length
-	usart->MR.clko = 1;          //Clock output select
-	usart->MR.over = 0;          //Oversampling mode 16x OS selected
-	usart->MR.inack = 0;         //Inhibit non acknowledge
+	usart->MR.clko = 1;          //Clock output select (USART drives CLK pin)
+	usart->MR.over = 0;          //Oversampling mode (16x)
+	usart->MR.inack = 0;         //Inhibit non acknowledge (nack is generated)
 	usart->MR.dsnack = 0;        //Disable successive NACK
 	usart->MR.var_sync = 0;      //Variable synchronization of Command
 	usart->MR.max_iteration = 0; //Max iterations in ISO7816 mode
@@ -110,8 +113,8 @@ char USART_getChar()
 	volatile avr32_usart_t *usart = &AVR32_USART1;
 	char RX_HOLD;
 	
-	while(!usart->CSR.rxrdy);
-	if(!usart->RHR.rxsynh)
+	while(!usart->CSR.rxrdy); //rxrdy indicates that a complete character has been received and that rhr is enabled
+	if(!usart->RHR.rxsynh) //indicates that the received character is data and not a command
 	{
 		RX_HOLD = usart->RHR.rxchr; 
 	}
