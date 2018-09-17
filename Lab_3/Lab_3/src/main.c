@@ -1,40 +1,11 @@
-/**
- * \file
- *
- * \brief Empty user application template
- *
- */
+#include "compiler.h"
+#include "board.h"
+#include "functions.h"
 
-/**
- * \mainpage User Application template doxygen documentation
- *
- * \par Empty user application template
- *
- * Bare minimum empty user application template
- *
- * \par Content
- *
- * -# Include the ASF header files (through asf.h)
- * -# "Insert system clock initialization code here" comment
- * -# Minimal main function that starts with a call to board_init()
- * -# "Insert application code here" comment
- *
- */
+int tc_channel = 0;
+int value = 14400;
+tc_write_rc(&AVR32_TC, tc_channel, value);
 
-/*
- * Include header files for all drivers that have been imported from
- * Atmel Software Framework (ASF).
- */
-/*
- * Support and FAQ: visit <a href="https://www.microchip.com/support/">Microchip Support</a>
- */
-#include <asf.h>
-
-int main (void)
-{
-	/* Insert system clock initialization code here (sysclk_init()). */
-
-	board_init();
-
-	/* Insert application code here, after the board has been initialized. */
-}
+int tc_write_rc(volatile avr32_tc_t * tc,
+unsigned int channel,
+unsigned short value);int tc_start(volatile avr32_tc_t * tc, unsigned int channel);
