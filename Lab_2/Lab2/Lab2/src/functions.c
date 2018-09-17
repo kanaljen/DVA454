@@ -1,8 +1,5 @@
 #include "functions.h"
 
-
-#define reset 0x00
-
 void USART_reset(volatile avr32_usart_t *usart)
 {
 	//Reset
