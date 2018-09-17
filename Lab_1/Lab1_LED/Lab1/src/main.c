@@ -34,7 +34,7 @@
 #define BUTTON_PORT2 (GPIO_PUSH_BUTTON_2 >> 5)
 #define BUTTON_PIN2 (1 << (GPIO_PUSH_BUTTON_2 & 0x1f))
 
-//Initialize clock
+//Initialize clock 
 void mdelay(int ms){
 	long volatile cycles = (ms * CYCLES_PER_MS);
 	while (cycles != 0){
