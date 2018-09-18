@@ -1,6 +1,7 @@
 #include "functions.h"
 
 volatile avr32_tc_t * tc = &AVR32_TC;
+volatile avr32_usart_t * usart = &AVR32_USART1;
 int tc_channel = 0;
 int value = 14400;
 
@@ -36,14 +37,13 @@ __attribute__((__interrupt__)) static void tc_irq_handler(void)
 
 int main(void)
 {
-	
+
+USART_init(usart);	
 TC_init(tc);
 tc_write_rc(tc, tc_channel, value);
 tc_init_waveform(tc, &waveform_opt);
-tc_start(tc, tc_channel); 
-
 Disable_global_interrupt();
 INTC_register_interrupt(&tc_irq_handler, AVR32_TC_IRQ0, AVR32_INTC_INT0);
 Enable_global_interrupt();
 
-tc_configure_interrupts(tc, tc_channel, &TC_INTERRUPT_OPT);tc_stop(tc, tc_channel);return 0;}
+//tc_configure_interrupts(tc, tc_channel, &TC_INTERRUPT_OPT);	//	tc_start(tc, tc_channel);//	tc_stop(tc, tc_channel);return 0;}
