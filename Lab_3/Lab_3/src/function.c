@@ -6,8 +6,8 @@ void TC_init(volatile avr32_tc_t * tc){
 
 	//Enable TC_CLK0 pin in GPIO
 	tc_gpio->gpers = 1; //Make the GPIO control the pins
-	tc_gpio->pmr0 = 1;	//Select peripheral A (clear)
-	tc_gpio->pmr1 = 0; //Select peripheral A (clear)
+	tc_gpio->pmr0s = 1;	//Select peripheral A (clear)
+	tc_gpio->pmr1c = 1; //Select peripheral A (clear)
 	tc_gpio->gperc = 1; //Enable peripheral control
 	
 	volatile avr32_pm_t *tc_PM = &AVR32_PM;
