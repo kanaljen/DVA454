@@ -1,7 +1,7 @@
 #include "functions.h"
 
 void TC_init(volatile avr32_tc_t * tc){
-		
+	
 	//Enable GPIO ports for communication
 	volatile avr32_gpio_port_t *tc_gpio = &AVR32_GPIO.port[0];
 	//Enable TC_CLK0 pin in GPIO
@@ -76,12 +76,6 @@ void USART_init(volatile avr32_usart_t * usart)
 	//Baud Rate Generator Register
 	usart->BRGR.fp = 0;    // No fraction needed
 	usart->BRGR.cd = 78;   // 12 000 000 / (8*9600(2 - 0)) = 78.125
-	
-	//Enable txrdy interrupt
-	usart->IER.txrdy = 1;
-	
-	//Transmit Holding Register
-	usart->THR.txsynh = 0;   //The next char sent is encoded as a data (DATA SYNC)
 	
 	//Enable GPIO ports for communication
 	volatile avr32_gpio_port_t *usart_gpio = &AVR32_GPIO.port[0];

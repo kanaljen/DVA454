@@ -4,6 +4,8 @@
 #include "compiler.h"
 #include "board.h"
 #include "tc.h"
+#include "intc.h"
+#include "gpio.h"
 
 #define TRUE 1
 #define FALSE 0
