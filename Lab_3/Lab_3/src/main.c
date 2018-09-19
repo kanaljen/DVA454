@@ -4,6 +4,8 @@ volatile avr32_tc_t * tc = &AVR32_TC;
 volatile avr32_usart_t * usart = &AVR32_USART1;
 int tc_channel = 0;
 int value = 14400;
+volatile static bool update = true;
+volatice static int seconds = 0;
 
 // Define the options for waveform generation
 static tc_waveform_opt_t waveform_opt =
@@ -33,6 +35,9 @@ __attribute__((__interrupt__)) static void tc_irq_handler(void)
 	// Clear the interrupt flag, this is done
 	// by reading the TC Status Register, SR.
 	tc_read_sr(tc, tc_channel);
+	update = true;
+	seconds++;
+	
 }
 
 int main(void)
@@ -50,4 +55,4 @@ INTC_register_interrupt(&tc_irq_handler, AVR32_TC_IRQ0, AVR32_INTC_INT0);
 Enable_global_interrupt();
 //End of mess
 
-int count = 0;char command;char buffer;char secs[11];char mins[11];char hrs[11];int seconds = 0;int minutes = 0;int hours = 0;tc_write_rc(tc, tc_channel, value); //Set a RC compare at 14400 (1 sec)tc_start(tc, tc_channel);while(1){	/*command = USART_getChar();		if(command == 's')		tc_start(tc, tc_channel);	else if(command == 'd')		tc_stop(tc, tc_channel);	*/	if(tc->channel->SR.cpcs) //Indicates if a RC compare has been reached, then resets?		seconds++;			if(seconds >= 60)	{		seconds = 0;		minutes++;	}	if(minutes >= 60)	{		minutes = 0;		hours++;	}	sprintf(buffer, "%d", seconds);	//buffer = sprintf(mins, "Minutes: %d", minutes);	//buffer = sprintf(hrs, "  Hours: %d", hours);	//USART_putStr(hrs);	//USART_putStr(mins);	USART_putChar(buffer);}return 0;}
+int count = 0;int minutes = 0;int hours = 0;char buffer;tc_write_rc(tc, tc_channel, value); //Set a RC compare at 14400 (1 sec)tc_start(tc, tc_channel);while(1){			if(seconds >= 60)	{		seconds = 0;		minutes++;	}	if(minutes >= 60)	{		minutes = 0;		hours++;	}	sprintf(buffer, "%d", seconds);	USART_putChar(buffer);}return 0;}
