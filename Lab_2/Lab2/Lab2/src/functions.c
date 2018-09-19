@@ -79,21 +79,21 @@ void USART_init(volatile avr32_usart_t * usart)
 	//Enable RXD pin in GPIO
 	//usart_gpio->oderc = 1 << 5;  //Disable output drivers
 	usart_gpio->gpers = 1 << 5;  //Make the GPIO control the pins
-	usart_gpio->pmr0c = 1 << 5;  //Select peripheral A (clear)
+	usart_gpio->pmr0c = 1 << 5;  //Select peripheral A (clear) {pmr1, pmr0} = 00
 	usart_gpio->pmr1c = 1 << 5;  //Select peripheral A (clear)
 	usart_gpio->gperc = 1 << 5;  //Enable peripheral control
 	
 	//Enable TXD pin in GPIO
 	//usart_gpio->oderc = 1 << 6;  //Disable output drivers
 	usart_gpio->gpers = 1 << 6;  //Make the GPIO control the pins
-	usart_gpio->pmr0c = 1 << 6;  //Select peripheral A (clear)
+	usart_gpio->pmr0c = 1 << 6;  //Select peripheral A (clear) {pmr1, pmr0} = 00
 	usart_gpio->pmr1c = 1 << 6;  //Select peripheral A (clear)
 	usart_gpio->gperc = 1 << 6;  //Enable peripheral control
 	
 	//Enable CLK pin in GPIO
 	//usart_gpio->oderc = 1 << 7;  //Disable output drivers
 	usart_gpio->gpers = 1 << 7;  //Make the GPIO control the pins
-	usart_gpio->pmr0c = 1 << 7;  //Select peripheral A (clear)
+	usart_gpio->pmr0c = 1 << 7;  //Select peripheral A (clear) {pmr1, pmr0} = 00
 	usart_gpio->pmr1c = 1 << 7;  //Select peripheral A (clear)
 	usart_gpio->gperc = 1 << 7;  //Enable peripheral control
 	

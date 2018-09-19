@@ -40,7 +40,6 @@ int main(void)
 
 USART_init(usart);	
 //TC_init(tc);
-//tc_write_rc(tc, tc_channel, value);
 tc_init_waveform(tc, &waveform_opt);
 
 //Interrupt mess
@@ -51,4 +50,4 @@ INTC_register_interrupt(&tc_irq_handler, AVR32_TC_IRQ0, AVR32_INTC_INT0);
 Enable_global_interrupt();
 //End of mess
 
-int count = 0;char command;int asd = 1;while(1){	//command = USART_getChar();	tc_write_rc(tc, tc_channel, value);	if(asd == 1)		tc_start(tc, tc_channel);	else if(count > 14400)		tc_stop(tc, tc_channel);	asd = 2;	count = tc_read_tc(tc, tc_channel);	USART_putChar(count);}return 0;}
+int count = 0;char command;char buffer;char secs[11];char mins[11];char hrs[11];int seconds = 0;int minutes = 0;int hours = 0;tc_write_rc(tc, tc_channel, value); //Set a RC compare at 14400 (1 sec)tc_start(tc, tc_channel);while(1){	/*command = USART_getChar();		if(command == 's')		tc_start(tc, tc_channel);	else if(command == 'd')		tc_stop(tc, tc_channel);	*/	if(tc->channel->SR.cpcs) //Indicates if a RC compare has been reached, then resets?		seconds++;			if(seconds >= 60)	{		seconds = 0;		minutes++;	}	if(minutes >= 60)	{		minutes = 0;		hours++;	}	sprintf(buffer, "%d", seconds);	//buffer = sprintf(mins, "Minutes: %d", minutes);	//buffer = sprintf(hrs, "  Hours: %d", hours);	//USART_putStr(hrs);	//USART_putStr(mins);	USART_putChar(buffer);}return 0;}
