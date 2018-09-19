@@ -1,14 +1,15 @@
 #include "functions.h"
 
-void TC_init(volatile avr32_tc_t * tc){
+void TC_init(volatile avr32_tc_t * tc, int tc_channel, __int_handler handler){
 	
-	//Enable GPIO ports for communication
-	volatile avr32_gpio_port_t *tc_gpio = &AVR32_GPIO.port[0];
-	//Enable TC_CLK0 pin in GPIO
-	tc_gpio->gpers = 1; //Make the GPIO control the pins
-	tc_gpio->pmr0s = 1;	//Select peripheral B (clear) {pmr1, pmr0} = 01
-	tc_gpio->pmr1c = 1; //Select peripheral B (clear)
-	tc_gpio->gperc = 1; //Enable peripheral control
+	tc_init_waveform(tc, &waveform_opt);
+	
+	//Init and configure interrupts
+	Disable_global_interrupt();
+	INTC_init_interrupts();
+	tc_configure_interrupts(tc, tc_channel, &TC_INTERRUPT_OPT);
+	INTC_register_interrupt(handler, AVR32_TC_IRQ0, AVR32_INTC_INT0);
+	Enable_global_interrupt();
 	
 }
 void USART_reset(volatile avr32_usart_t *usart)
@@ -102,7 +103,7 @@ void USART_init(volatile avr32_usart_t * usart)
 	usart_gpio->gperc = 1 << 7;  //Enable peripheral control
 	
 	volatile avr32_pm_t *usart_PM = &AVR32_PM;
-	usart_PM->OSCCTRL0.mode = 4;    //Crystal is connected to xin/xout with gain G2
+	usart_PM->OSCCTRL0.mode = 4;    //Crystal is connected to xin/xout with gain G0
 	usart_PM->OSCCTRL0.startup = 6; //Startup time 142 ms
 	usart_PM->MCCTRL.osc0en = 1;    //Oscillator 0 ENABLED
 	usart_PM->MCCTRL.osc1en = 0;    //Oscillator 1 DISABLED
@@ -121,19 +122,28 @@ char USART_getChar()
 	}
 	return RX_HOLD;
 }
+char USART_pollChar(void)
+{
+	volatile avr32_usart_t *usart = &AVR32_USART1;
+	
+	if(usart->CSR.rxrdy)
+		return usart->RHR.rxchr;
+	else
+		return;
+}
 void USART_putChar(char c)
 {
 	volatile avr32_usart_t *usart = &AVR32_USART1;
 	while(!usart->CSR.txrdy); //The transmitter reports to CSR txrdy = 1 which indicates that THR is empty and TXEMPTY is 0
 	usart->THR.txchr = c; //Receive whatever data is in the transmit holding register THR
 }
+
 void USART_putStr(char *c)
 {
 	volatile avr32_usart_t *usart = &AVR32_USART1;
-	int k = sizeof(c);
 	int i;
 	
-	for(i = 0; i < k; i++)
+	for(i = 0; i < 16; i++)
 	{
 		while(!usart->CSR.txrdy); //The transmitter reports to CSR txrdy = 1 which indicates that THR is empty and TXEMPTY is 0
 		usart->THR.txchr = c[i]; //Receive whatever data is in the transmit holding register THR
