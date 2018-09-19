@@ -14,7 +14,7 @@ void USART_reset(volatile avr32_usart_t *usart)
 	usart->CR.rststa = 0;  //Resets status bits (0)
 	usart->CR.rstnack = 0; //Reset non acknowledge (0)
 	
-	//reenables receiver and transmitter
+	//re-enables receiver and transmitter
 	usart->CR.rxdis = 0;   //Should be 0 to NOT disable receiver (0)
 	usart->CR.rxen =  1;   //Enables receiver (1)
 	usart->CR.txdis = 0;   //Should be 0 to NOT disable transmitter (0)
@@ -68,7 +68,7 @@ void USART_init(volatile avr32_usart_t * usart)
 	usart->BRGR.cd = 78;   // 12 000 000 / (8*9600(2 - 0)) = 78.125 
 	
 	//Enable txrdy interrupt
-	usart->IER.txrdy = 1;
+	//usart->IER.txrdy = 1;
 	
 	//Transmit Holding Register
 	usart->THR.txsynh = 0;   //The next char sent is encoded as a data (DATA SYNC)
@@ -98,7 +98,7 @@ void USART_init(volatile avr32_usart_t * usart)
 	usart_gpio->gperc = 1 << 7;  //Enable peripheral control
 	
 	volatile avr32_pm_t *usart_PM = &AVR32_PM; 
-	usart_PM->OSCCTRL0.mode = 4;    //Crystal is connected to xin/xout with gain G2
+	usart_PM->OSCCTRL0.mode = 4;    //Crystal is connected to xin/xout with gain G0
 	usart_PM->OSCCTRL0.startup = 6; //Startup time 142 ms
 	usart_PM->MCCTRL.osc0en = 1;    //Oscillator 0 ENABLED
 	usart_PM->MCCTRL.osc1en = 0;    //Oscillator 1 DISABLED
