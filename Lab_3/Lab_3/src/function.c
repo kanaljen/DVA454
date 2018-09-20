@@ -2,14 +2,14 @@
 
 void TC_init(volatile avr32_tc_t * tc, int tc_channel, __int_handler handler){
 	
-	tc_init_waveform(tc, &waveform_opt);
+	tc_init_waveform(tc, &waveform_opt);								//Initiate waveform with waveform options
 	
 	//Init and configure interrupts
-	Disable_global_interrupt();
-	INTC_init_interrupts();
-	tc_configure_interrupts(tc, tc_channel, &TC_INTERRUPT_OPT);
-	INTC_register_interrupt(handler, AVR32_TC_IRQ0, AVR32_INTC_INT0);
-	Enable_global_interrupt();
+	Disable_global_interrupt();											//Disable global interrupts to not get problems while configuring TC interrupts
+	INTC_init_interrupts();												//Initiate TC interrupts
+	tc_configure_interrupts(tc, tc_channel, &TC_INTERRUPT_OPT);			//Configure TC interrupts
+	INTC_register_interrupt(handler, AVR32_TC_IRQ0, AVR32_INTC_INT0);	//Initiate interrupts handler so it will interrupt on RC compare
+	Enable_global_interrupt();											//Enable global interrupts once configuration is finished
 	
 }
 void USART_reset(volatile avr32_usart_t *usart)
@@ -124,9 +124,11 @@ char USART_getChar()
 }
 char USART_pollChar(void)
 {
+	//Instead of waiting for a char, just looks once if 
+	//there is something there and read it, else return nothing
 	volatile avr32_usart_t *usart = &AVR32_USART1;
 	
-	if(usart->CSR.rxrdy)
+	if(usart->CSR.rxrdy)			
 		return usart->RHR.rxchr;
 	else
 		return;
