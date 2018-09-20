@@ -27,8 +27,10 @@ TC_init(tc, tc_channel, &tc_irq_handler);tc_write_rc(tc, tc_channel, value); //
 			break;
 		case 'd':
 			tc_start(tc, tc_channel);
+// 			sprintf('\033[2J');
+// 			USART_putStr(buffer);
 			seconds = 0;			minutes = 0;			hours = 0;
 			break;
 		default:
 			break; 
-	}	if(tick == 100)	{		if(seconds >= 60)		{			seconds = 0;			minutes++;		}		if(minutes >= 60)		{			minutes = 0;			hours++;		}		sprintf(buffer, "\n%d : %d : %d", hours, minutes, seconds);		USART_putStr(buffer);		seconds++;		tick = 0;	}}return 0;}
+	}	if(tick == 100)	{		if(seconds >= 60)		{			seconds = 0;			minutes++;		}		if(minutes >= 60)		{			minutes = 0;			hours++;		}		sprintf(buffer, "\033[2J\033c%d : %d : %d", hours, minutes, seconds);		USART_putStr(buffer);		seconds++;		tick = 0;	}}return 0;}
