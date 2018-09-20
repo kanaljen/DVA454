@@ -5,6 +5,7 @@
 #include "compiler.h"
 #include "gpio.h"
 #include "adc.h"
+#include "dip204.h"
 
 
 #endif
