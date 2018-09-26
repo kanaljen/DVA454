@@ -100,6 +100,21 @@ typedef unsigned char uint8_t;
 #define TC_SR (*((volatile uint32_t*)(TC_CHANNEL_ADRESS + TC_SR_OFFSET)))
 #define TC_RC (*((volatile uint32_t*)(TC_CHANNEL_ADRESS + TC_RC_OFFSET)))
 
+/* ----------------------- RTC ----------------------- */
+#define RTC_BASE_ADDRESS 0xFFFF0D00
 
+#define RTC_CTRL_OFFSET 0x00
+#define RTC_VAL_OFFSET 0x04
+#define RTC_TOP_OFFSET 0x10
+#define RTC_IER_OFFSET 0x10
+#define RTC_ISR_OFFSET 0x1c
+#define RTC_ICR_OFFSET 0x20
+
+#define RTC_CTRL (*((volatile uint32_t*)(RTC_BASE_ADDRESS + TC_CCR_OFFSET)))
+#define RTC_VAL (*((volatile uint32_t*)(RTC_BASE_ADDRESS + RTC_VAL_OFFSET)))
+#define RTC_TOP (*((volatile uint32_t*)(RTC_BASE_ADDRESS + RTC_TOP_OFFSET)))
+#define RTC_IER (*((volatile uint32_t*)(RTC_BASE_ADDRESS + RTC_IER_OFFSET)))
+#define RTC_ISR (*((volatile uint32_t*)(RTC_BASE_ADDRESS + RTC_ISR_OFFSET)))
+#define RTC_ICR (*((volatile uint32_t*)(RTC_BASE_ADDRESS + RTC_ICR_OFFSET)))
 
 #endif 

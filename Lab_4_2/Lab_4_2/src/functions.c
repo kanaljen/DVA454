@@ -45,3 +45,8 @@ void TC_init(void)
 	TC_CCR = 0x05;
 	TC_CMR = 0x4002;
 }
+void RTC_init(void)
+{
+	RTC_CTRL = 0x1000F
+	RTC_TOP =
+}
