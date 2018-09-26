@@ -31,12 +31,17 @@ void ext_clk_init(void)
 {
 	PM_MCCTRL = 0x05;
 	PM_OSCCTRL0 = 0x604;
-	PM_GCCTRL = 0x814;	
 }
 
 void clk_mux(void)
 {
 	//Select peripheral function B {pmr1, pmr} = 01 at pin 51, port 1 (51 - 32) = 19
-	GPIO_PORT1_PMR0S = (1 << 19); //Set pmr0 to 1
-	GPIO_PORT1_PMR1C = (1 << 19); //Set pmr1 to 0 (clear)
+	//GPIO_PORT1_PMR0S = (1 << 19); //Set pmr0 to 1
+	//GPIO_PORT1_PMR1C = (1 << 19); //Set pmr1 to 0 (clear)
+}
+
+void TC_init(void)
+{
+	TC_CCR = 0x05;
+	TC_CMR = 0x4002;
 }

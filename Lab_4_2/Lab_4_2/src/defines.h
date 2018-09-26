@@ -78,14 +78,28 @@ typedef unsigned char uint8_t;
 
 #define PM_MCCTRL_OFFSET 0x0000 //Main clock control
 #define PM_OSCCTRL0_OFFSET 0x0028 //Oscillator 0 control
-#define PM_GCCTRL_OFFSET 0x0060 //Generic clock control
 
 #define PM_MCCTRL (*((volatile uint32_t*)(PM_BASE_ADRESS + PM_MCCTRL_OFFSET)))
 #define PM_OSCCTRL0 (*((volatile uint32_t*)(PM_BASE_ADRESS + PM_OSCCTRL0_OFFSET)))
-#define PM_GCCTRL (*((volatile uint32_t*)(PM_BASE_ADRESS + PM_GCCTRL_OFFSET)))
 
 /* ----------------------- Timer/Counter ----------------------- */
-//#define TC_BASE_ADRESS 0xFFFF0800
+
+#define TC_BASE_ADRESS 0xFFFF3800
+#define TC_CHANNEL_OFFSET 0x00
+#define TC_CHANNEL_ADRESS (TC_BASE_ADRESS + TC_CHANNEL_OFFSET)
+
+#define TC_CCR_OFFSET 0x00
+#define TC_CMR_OFFSET 0x04
+#define TC_CV_OFFSET 0x10
+#define TC_SR_OFFSET 0x20
+#define TC_RC_OFFSET 0x1C
+
+#define TC_CCR (*((volatile uint32_t*)(TC_CHANNEL_ADRESS + TC_CCR_OFFSET)))
+#define TC_CMR (*((volatile uint32_t*)(TC_CHANNEL_ADRESS + TC_CMR_OFFSET)))
+#define TC_CV (*((volatile uint32_t*)(TC_CHANNEL_ADRESS + TC_CV_OFFSET)))
+#define TC_SR (*((volatile uint32_t*)(TC_CHANNEL_ADRESS + TC_SR_OFFSET)))
+#define TC_RC (*((volatile uint32_t*)(TC_CHANNEL_ADRESS + TC_RC_OFFSET)))
+
 
 
 #endif 
