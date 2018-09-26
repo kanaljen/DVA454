@@ -110,18 +110,6 @@ void USART_init(volatile avr32_usart_t * usart)
 	usart_PM->MCCTRL.mcsel = 1;     //Oscillator 0 is the source for the main clock
 }
 
-char USART_getChar()
-{
-	volatile avr32_usart_t *usart = &AVR32_USART1;
-	char RX_HOLD;
-	
-	while(!usart->CSR.rxrdy); //rxrdy indicates that a complete character has been received and that rhr is enabled
-	if(!usart->RHR.rxsynh) //indicates that the received character is data and not a command
-	{
-		RX_HOLD = usart->RHR.rxchr;
-	}
-	return RX_HOLD;
-}
 char USART_pollChar(void)
 {
 	//Instead of waiting for a char, just looks once if 
@@ -133,19 +121,13 @@ char USART_pollChar(void)
 	else
 		return;
 }
-void USART_putChar(char c)
-{
-	volatile avr32_usart_t *usart = &AVR32_USART1;
-	while(!usart->CSR.txrdy); //The transmitter reports to CSR txrdy = 1 which indicates that THR is empty and TXEMPTY is 0
-	usart->THR.txchr = c; //Receive whatever data is in the transmit holding register THR
-}
 
 void USART_putStr(char *c)
 {
 	volatile avr32_usart_t *usart = &AVR32_USART1;
 	int i;
 	
-	for(i = 0; i < 16; i++)
+	for(i = 0; i < 32; i++)
 	{
 		while(!usart->CSR.txrdy); //The transmitter reports to CSR txrdy = 1 which indicates that THR is empty and TXEMPTY is 0
 		usart->THR.txchr = c[i]; //Receive whatever data is in the transmit holding register THR

@@ -35,9 +35,7 @@ static const tc_interrupt_t TC_INTERRUPT_OPT =
 
 void TC_init(volatile avr32_tc_t * tc, int tc_channel, __int_handler handler);
 void USART_init(volatile avr32_usart_t * usart);
-char USART_getChar();
 char USART_pollChar();
-void USART_putChar(char c);
 void USART_putStr(char *c);
 void USART_reset(volatile avr32_usart_t * usart);
 
