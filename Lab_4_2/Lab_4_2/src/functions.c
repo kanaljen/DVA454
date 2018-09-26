@@ -27,26 +27,13 @@ void LED0_output(uint8_t value)
 	}
 }
 
-void ext_clk_init(void)
+void CLK_init(void)
 {
 	PM_MCCTRL = 0x05;
 	PM_OSCCTRL0 = 0x604;
 }
-
-void clk_mux(void)
-{
-	//Select peripheral function B {pmr1, pmr} = 01 at pin 51, port 1 (51 - 32) = 19
-	//GPIO_PORT1_PMR0S = (1 << 19); //Set pmr0 to 1
-	//GPIO_PORT1_PMR1C = (1 << 19); //Set pmr1 to 0 (clear)
-}
-
 void TC_init(void)
 {
 	TC_CCR = 0x05;
 	TC_CMR = 0x4002;
-}
-void RTC_init(void)
-{
-	RTC_CTRL = 0x1000F
-	RTC_TOP =
 }

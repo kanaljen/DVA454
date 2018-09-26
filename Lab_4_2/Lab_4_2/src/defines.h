@@ -32,17 +32,6 @@ typedef unsigned char uint8_t;
 #define GPIO_OVRC_OFFSET 0x58
 #define GPIO_OVRT_OFFSET 0x5C
 
-#define GPIO_PMR0_OFFSET 0x10
-#define GPIO_PMR0S_OFFSET 0x14
-#define GPIO_PMR0C_OFFSET 0x18
-#define GPIO_PMR0T_OFFSET 0x1C
-
-#define GPIO_PMR1_OFFSET 0x20
-#define GPIO_PMR1S_OFFSET 0x24
-#define GPIO_PMR1C_OFFSET 0x28
-#define GPIO_PMR1T_OFFSET 0x2C
-
-
 /* Some defines so we can access the GPIO port 1 registers directly */
 #define GPIO_PORT1_GPER (*((volatile uint32_t*)(GPIO_PORT1_ADDRESS + GPIO_GPER_OFFSET)))
 #define GPIO_PORT1_GPERS (*((volatile uint32_t*)(GPIO_PORT1_ADDRESS + GPIO_GPERS_OFFSET)))
@@ -58,18 +47,6 @@ typedef unsigned char uint8_t;
 #define GPIO_PORT1_OVRS (*((volatile uint32_t*)(GPIO_PORT1_ADDRESS + GPIO_OVRS_OFFSET)))
 #define GPIO_PORT1_OVRC (*((volatile uint32_t*)(GPIO_PORT1_ADDRESS + GPIO_OVRC_OFFSET)))
 #define GPIO_PORT1_OVRT (*((volatile uint32_t*)(GPIO_PORT1_ADDRESS + GPIO_OVRT_OFFSET)))
-
-//Peripheral Mux Register 0
-#define GPIO_PORT1_PMR0 (*((volatile uint32_t*)(GPIO_PORT1_ADDRESS + GPIO_PMR0_OFFSET)))
-#define GPIO_PORT1_PMR0S (*((volatile uint32_t*)(GPIO_PORT1_ADDRESS + GPIO_PMR0S_OFFSET)))
-#define GPIO_PORT1_PMR0C (*((volatile uint32_t*)(GPIO_PORT1_ADDRESS + GPIO_PMR0C_OFFSET)))
-#define GPIO_PORT1_PMR0T (*((volatile uint32_t*)(GPIO_PORT1_ADDRESS + GPIO_PMR0T_OFFSET)))
-
-//Peripheral Mux Register 1
-#define GPIO_PORT1_PMR1 (*((volatile uint32_t*)(GPIO_PORT1_ADDRESS + GPIO_PMR1_OFFSET)))
-#define GPIO_PORT1_PMR1S (*((volatile uint32_t*)(GPIO_PORT1_ADDRESS + GPIO_PMR1S_OFFSET)))
-#define GPIO_PORT1_PMR1T (*((volatile uint32_t*)(GPIO_PORT1_ADDRESS + GPIO_PMR1C_OFFSET)))
-#define GPIO_PORT1_PMR1C (*((volatile uint32_t*)(GPIO_PORT1_ADDRESS + GPIO_PMR1T_OFFSET)))
 
 /* --------------------------- Power Manager ------------------------   */
 
@@ -91,30 +68,13 @@ typedef unsigned char uint8_t;
 #define TC_CCR_OFFSET 0x00
 #define TC_CMR_OFFSET 0x04
 #define TC_CV_OFFSET 0x10
-#define TC_SR_OFFSET 0x20
 #define TC_RC_OFFSET 0x1C
 
 #define TC_CCR (*((volatile uint32_t*)(TC_CHANNEL_ADRESS + TC_CCR_OFFSET)))
 #define TC_CMR (*((volatile uint32_t*)(TC_CHANNEL_ADRESS + TC_CMR_OFFSET)))
 #define TC_CV (*((volatile uint32_t*)(TC_CHANNEL_ADRESS + TC_CV_OFFSET)))
-#define TC_SR (*((volatile uint32_t*)(TC_CHANNEL_ADRESS + TC_SR_OFFSET)))
 #define TC_RC (*((volatile uint32_t*)(TC_CHANNEL_ADRESS + TC_RC_OFFSET)))
 
-/* ----------------------- RTC ----------------------- */
-#define RTC_BASE_ADDRESS 0xFFFF0D00
 
-#define RTC_CTRL_OFFSET 0x00
-#define RTC_VAL_OFFSET 0x04
-#define RTC_TOP_OFFSET 0x10
-#define RTC_IER_OFFSET 0x10
-#define RTC_ISR_OFFSET 0x1c
-#define RTC_ICR_OFFSET 0x20
-
-#define RTC_CTRL (*((volatile uint32_t*)(RTC_BASE_ADDRESS + TC_CCR_OFFSET)))
-#define RTC_VAL (*((volatile uint32_t*)(RTC_BASE_ADDRESS + RTC_VAL_OFFSET)))
-#define RTC_TOP (*((volatile uint32_t*)(RTC_BASE_ADDRESS + RTC_TOP_OFFSET)))
-#define RTC_IER (*((volatile uint32_t*)(RTC_BASE_ADDRESS + RTC_IER_OFFSET)))
-#define RTC_ISR (*((volatile uint32_t*)(RTC_BASE_ADDRESS + RTC_ISR_OFFSET)))
-#define RTC_ICR (*((volatile uint32_t*)(RTC_BASE_ADDRESS + RTC_ICR_OFFSET)))
 
 #endif 
