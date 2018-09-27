@@ -1,6 +1,8 @@
 #include "board.h"
 #include "compiler.h"
 
+
+
 //Define clock
 #define CYCLES_PER_MS (115/11)
 
@@ -36,11 +38,6 @@
 #define LED7_PORT ( LED7_GPIO / GPIO_MAX_PIN_NUMBER )
 #define LED7_PIN ( LED7_GPIO & ( GPIO_MAX_PIN_NUMBER -1))
 #define LED7_BIT_VALUE (1 << LED7_PIN )
-
-//Define button 0
-#define BUTTON_PORT0 (GPIO_PUSH_BUTTON_0 >> 5)
-#define BUTTON_PIN0 (1 << (GPIO_PUSH_BUTTON_0 & 0x1f))
-
 
 //Initialize clock
 void mdelay(int ms){
@@ -93,54 +90,42 @@ void initLED (void)
 int main (void)
 {
 	initLED (); //Initialize LED function
-	//initButton();
-
-	volatile int button_state0; //Initialize button state 0
 	
 	while(1) {
-		button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read Button 0
-
-		if(!button_state0){
 			
 			//Forwards
 			AVR32_GPIO.port[LED0_PORT].ovrt = LED0_BIT_VALUE; //Toggle LED0
-			mdelay(500);
+			mdelay(250);
 			AVR32_GPIO.port[LED0_PORT].ovrt = LED0_BIT_VALUE; //Toggle LED0
 			AVR32_GPIO.port[LED1_PORT].ovrt = LED1_BIT_VALUE; //Toggle LED1
-			mdelay(500);
+			mdelay(250);
 			AVR32_GPIO.port[LED1_PORT].ovrt = LED1_BIT_VALUE; //Toggle LED1
 			AVR32_GPIO.port[LED2_PORT].ovrt = LED2_BIT_VALUE; //Toggle LED2
-			mdelay(500);
+			mdelay(250);
 			AVR32_GPIO.port[LED2_PORT].ovrt = LED2_BIT_VALUE; //Toggle LED2
 			AVR32_GPIO.port[LED3_PORT].ovrt = LED3_BIT_VALUE; //Toggle LED3		
-			mdelay(500);
+			mdelay(250);
 			AVR32_GPIO.port[LED3_PORT].ovrt = LED3_BIT_VALUE; //Toggle LED3
 			AVR32_GPIO.port[LED5_PORT].ovrt = LED5_BIT_VALUE; //Toggle LED6
-			mdelay(500);
+			mdelay(250);
 			AVR32_GPIO.port[LED5_PORT].ovrt = LED5_BIT_VALUE; //Toggle LED6
 			AVR32_GPIO.port[LED7_PORT].ovrt = LED7_BIT_VALUE; //Toggle LED7
-			mdelay(500);
+			mdelay(250);
 			
 			//Backwards
 			AVR32_GPIO.port[LED7_PORT].ovrt = LED7_BIT_VALUE; //Toggle LED7
 			AVR32_GPIO.port[LED5_PORT].ovrt = LED5_BIT_VALUE; //Toggle LED6
-			mdelay(500);
+			mdelay(250);
 			AVR32_GPIO.port[LED5_PORT].ovrt = LED5_BIT_VALUE; //Toggle LED6
 			AVR32_GPIO.port[LED3_PORT].ovrt = LED3_BIT_VALUE; //Toggle LED3
-			mdelay(500);
+			mdelay(250);
 			AVR32_GPIO.port[LED3_PORT].ovrt = LED3_BIT_VALUE; //Toggle LED3
 			AVR32_GPIO.port[LED2_PORT].ovrt = LED2_BIT_VALUE; //Toggle LED2
-			mdelay(500);
+			mdelay(250);
 			AVR32_GPIO.port[LED2_PORT].ovrt = LED2_BIT_VALUE; //Toggle LED2
 			AVR32_GPIO.port[LED1_PORT].ovrt = LED1_BIT_VALUE; //Toggle LED1
-			mdelay(500);
+			mdelay(250);
 			AVR32_GPIO.port[LED1_PORT].ovrt = LED1_BIT_VALUE; //Toggle LED1
-			AVR32_GPIO.port[LED0_PORT].ovrt = LED0_BIT_VALUE; //Toggle LED0
-			mdelay(500);
-			AVR32_GPIO.port[LED0_PORT].ovrt = LED0_BIT_VALUE; //Toggle LED0
-		}
-		
-		
 	}
 	while(1);
 }
