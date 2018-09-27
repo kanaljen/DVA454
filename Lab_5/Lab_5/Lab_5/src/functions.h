@@ -9,7 +9,8 @@
 #ifndef FUNCTIONS_H_
 #define FUNCTIONS_H_
 
-
+#include "FreeRTOS.h"
+#include "task.h"
 
 
 
