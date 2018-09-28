@@ -52,12 +52,16 @@ void init_LED(void)
 static portTASK_FUNCTION(vLED_TASK1, pvParameters)
 {
 	volatile avr32_gpio_port_t * led0 = &AVR32_GPIO.port[LED0_PORT];
+	portTickType xLastWakeTime;
+	const portTickType xFrequency = 20;
+	xLastWakeTime = xTaskGetTickCount();
+
 	while(1)
 	{
 		led0->ovrt = LED0_BIT_VALUE;
-		vTaskDelay(1000);
+		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 		led0->ovrt = LED0_BIT_VALUE;
-		vTaskDelay(1000);
+		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }
 static portTASK_FUNCTION(vLED_TASK2, pvParameters)
@@ -66,21 +70,25 @@ static portTASK_FUNCTION(vLED_TASK2, pvParameters)
 	(void) pvParameters;
 	
 	volatile avr32_gpio_port_t * led1 = &AVR32_GPIO.port[LED1_PORT];
+	portTickType xLastWakeTime;
+	const portTickType xFrequency = 10;
+	xLastWakeTime = xTaskGetTickCount();
+
 	while(1)
 	{
 		led1->ovrt = LED1_BIT_VALUE;
-		vTaskDelay(1000);
+		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 		led1->ovrt = LED1_BIT_VALUE;
-		vTaskDelay(1000);
+		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }
-
-void main(void)
+int main(void)
 {
 	init_LED();
 	xTaskCreate( vLED_TASK1, ( signed char * ) "LEDx", ( unsigned portSHORT ) 256, NULL, (unsigned portBASE_TYPE) 1, ( xTaskHandle * ) NULL );
 	xTaskCreate( vLED_TASK2, ( signed char * ) "LEDx", ( unsigned portSHORT ) 256, NULL, (unsigned portBASE_TYPE) 1, ( xTaskHandle * ) NULL );
-	
+	vTaskStartScheduler();
+	while(1);
 	//button0_state = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read Button 0
 	//button1_state = AVR32_GPIO.port[BUTTON_PORT1].pvr & BUTTON_PIN1; //Read Button 1
 	//button2_state = AVR32_GPIO.port[BUTTON_PORT2].pvr & BUTTON_PIN2; //Read Button 2
