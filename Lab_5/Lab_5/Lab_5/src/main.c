@@ -55,7 +55,7 @@ void vLED_TASK0(void* pvParameters)
 	char c[32] = "LED 1 toggled\n";
 	volatile avr32_gpio_port_t * led0 = &AVR32_GPIO.port[LED0_PORT];
 	portTickType xLastWakeTime;
-	const portTickType xFrequency = 10;
+	const portTickType xFrequency = 1000;
 
 	while(1)
 	{
@@ -77,7 +77,7 @@ void vLED_TASK1(void* pvParameters)
 	char c[32] = "LED 1 toggled\n";
 	volatile avr32_gpio_port_t * led1 = &AVR32_GPIO.port[LED1_PORT];
 	portTickType xLastWakeTime;
-	const portTickType xFrequency = 20;
+	const portTickType xFrequency = 2000;
 
 	while(1)
 	{
@@ -100,7 +100,7 @@ void vLED_TASK2(void* pvParameters)
 	char c[32] = "LED 2 toggled\n";
 	volatile avr32_gpio_port_t * led2 = &AVR32_GPIO.port[LED2_PORT];
 	portTickType xLastWakeTime;
-	const portTickType xFrequency = 30;
+	const portTickType xFrequency = 3000;
 
 	while(1)
 	{
@@ -124,7 +124,7 @@ void vbutton_TASK0(void* pvParameters)
 	volatile int button_state0; //Initialize button state 0	
 	volatile avr32_gpio_port_t * led0 = &AVR32_GPIO.port[LED0_PORT];
 	portTickType xLastWakeTime;
-	const portTickType xFrequency = 60;
+	const portTickType xFrequency = 10000;
 	xTaskHandle task  = *(xTaskHandle *)pvParameters;
 	
 	while(1){
@@ -155,7 +155,7 @@ void vbutton_TASK1(void* pvParameters)
 	volatile int button_state1; //Initialize button state 1	
 	volatile avr32_gpio_port_t * led1 = &AVR32_GPIO.port[LED1_PORT];
 	portTickType xLastWakeTime;
-	const portTickType xFrequency = 60;
+	const portTickType xFrequency = 10000;
 	xTaskHandle task  = *(xTaskHandle *)pvParameters;
 	
 	while(1){
@@ -186,7 +186,7 @@ void vbutton_TASK2(void* pvParameters)
 	volatile int button_state2; //Initialize button state 2	
 	volatile avr32_gpio_port_t * led2 = &AVR32_GPIO.port[LED2_PORT];
 	portTickType xLastWakeTime;
-	const portTickType xFrequency = 60;
+	const portTickType xFrequency = 10000;
 	xTaskHandle task = *(xTaskHandle *)pvParameters;
 
 	while(1){
