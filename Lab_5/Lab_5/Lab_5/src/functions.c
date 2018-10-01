@@ -25,6 +25,9 @@ void USART_init(void)
 	gpio_enable_module(USART_DEBUG_GPIO_MAP , 2);
 	usart_init_rs232(serialPORT_USART , &USART_OPTIONS , FOSC0);
 	usart_init_rs232(configDBG_USART , &USART_OPTIONS , FOSC0);
+	
+	usart_write_line(configDBG_USART , "USART Initialized\n"); 
+	
 }
 void init_LED(void)
 {
@@ -42,10 +45,11 @@ void init_LED(void)
 	led2_port->gpers = LED2_BIT_VALUE; //Set Enable register
 	led2_port->ovrs = LED2_BIT_VALUE; //Set output value register
 	led2_port->oders = LED2_BIT_VALUE; //Set output drive register
+	
+	usart_write_line(configDBG_USART , "LEDs Initialized\n"); 
 }
 void vLED_TASK0(void* pvParameters)
 {
-	char c[32] = "LED 0 toggled";
 	volatile avr32_gpio_port_t * led0 = &AVR32_GPIO.port[LED0_PORT];
 	portTickType xLastWakeTime;
 	const portTickType xFrequency = 1000;

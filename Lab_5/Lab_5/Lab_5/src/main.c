@@ -13,6 +13,7 @@ int main(void)
 	xTaskCreate(vbutton_TASK0, "BUTTON0", 256, &(blinkHandle[0]), tskIDLE_PRIORITY+1, NULL);
 	xTaskCreate(vbutton_TASK1, "BUTTON1", 256, &(blinkHandle[1]), tskIDLE_PRIORITY+1, NULL);
 	xTaskCreate(vbutton_TASK2, "BUTTON2", 256, &(blinkHandle[2]), tskIDLE_PRIORITY+1, NULL);
+	usart_write_line(configDBG_USART , "Starting Scheduler\n"); 
 	vTaskStartScheduler();	
 	while(1);
 
