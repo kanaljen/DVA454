@@ -4,8 +4,8 @@ int main(void)
 {	
 	volatile avr32_usart_t *usart = &AVR32_USART1;
 	xTaskHandle *blinkHandle = malloc(sizeof(xTaskHandle *)*3);
-
-	USART_init(usart);
+	
+	USART_init();
 	init_LED();
 	xTaskCreate(vLED_TASK0, "LED0", 256, NULL, tskIDLE_PRIORITY+1, &(blinkHandle[0]));
 	xTaskCreate(vLED_TASK1, "LED1", 256, NULL, tskIDLE_PRIORITY+1, &(blinkHandle[1]));

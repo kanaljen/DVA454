@@ -61,8 +61,8 @@
 	#define configCPU_CLOCK_HZ        ( EXAMPLE_TARGET_MCUCLK_FREQ_HZ ) /* Hz clk gen */
 	#define configPBA_CLOCK_HZ        ( EXAMPLE_TARGET_PBACLK_FREQ_HZ )
 #else
-	#define configCPU_CLOCK_HZ        ( FOSC0 ) /* Hz clk gen */
-	#define configPBA_CLOCK_HZ        ( FOSC0 )
+	#define configCPU_CLOCK_HZ        115200//( FOSC0 ) /* Hz clk gen */
+	#define configPBA_CLOCK_HZ        115200//( FOSC0 )
 #endif
 #define configTICK_RATE_HZ        ( ( portTickType ) 1000 )
 #define configMAX_PRIORITIES      ( ( unsigned portBASE_TYPE ) 8 )

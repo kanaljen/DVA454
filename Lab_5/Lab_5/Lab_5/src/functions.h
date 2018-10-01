@@ -4,6 +4,10 @@
 #include "task.h"
 #include "board.h"
 #include "compiler.h"
+#include "pm.h"
+#include "usart.h"
+#include "gpio.h"
+
 
 #ifndef FUNCTIONS_H_
 #define FUNCTIONS_H_
@@ -37,10 +41,24 @@
 #define BUTTON_PORT2 (GPIO_PUSH_BUTTON_2 >> 5)
 #define BUTTON_PIN2 (1 << (GPIO_PUSH_BUTTON_2 & 0x1f))
 
-void USART_init(volatile avr32_usart_t * usart);
+#define configDBG 1
+#define configDBG_USART (&AVR32_USART1)
+#define configDBG_USART_RX_PIN AVR32_USART1_RXD_0_0_PIN
+#define configDBG_USART_RX_FUNCTION AVR32_USART1_RXD_0_0_FUNCTION
+#define configDBG_USART_TX_PIN AVR32_USART1_TXD_0_0_PIN
+#define configDBG_USART_TX_FUNCTION AVR32_USART1_TXD_0_0_FUNCTION
+#define configDBG_USART_BAUDRATE 57600
+
+#define serialPORT_USART (&AVR32_USART1)
+#define serialPORT_USART_RX_PIN AVR32_USART1_RXD_0_0_PIN
+#define serialPORT_USART_RX_FUNCTION AVR32_USART1_RXD_0_0_FUNCTION
+#define serialPORT_USART_TX_PIN AVR32_USART1_TXD_0_0_PIN
+#define serialPORT_USART_TX_FUNCTION AVR32_USART1_TXD_0_0_FUNCTION
+#define serialPORT_USART_IRQ AVR32_USART1_IRQ
+#define serialPORT_USART_BAUDRATE 57600
+
+void USART_init(void);
 void init_LED(void);
-void USART_putStr(char *c);
-void USART_reset(volatile avr32_usart_t * usart);
 void vLED_TASK0(void* pvParameters);
 void vLED_TASK1(void* pvParameters);
 void vLED_TASK2(void* pvParameters);
