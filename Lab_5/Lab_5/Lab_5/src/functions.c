@@ -123,7 +123,12 @@ void USART_putStr(char *c)
 	
 	for(i = 0; i < 32; i++)
 	{
+		
 		while(!usart->CSR.txrdy); //The transmitter reports to CSR txrdy = 1 which indicates that THR is empty and TXEMPTY is 0
 		usart->THR.txchr = c[i]; //Receive whatever data is in the transmit holding register THR
+		if(c[i] == '\0'){
+			usart->THR.txchr = '\n';
+			break;
+		}
 	}
 }
