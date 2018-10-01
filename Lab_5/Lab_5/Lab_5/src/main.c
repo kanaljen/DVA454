@@ -102,14 +102,16 @@ void vbutton_TASK0(void* pvParameters)
 	portTickType xLastWakeTime;
 	const portTickType xFrequency = 60;
 	xLastWakeTime = xTaskGetTickCount();
-		xTaskHandle task;
-		task=*(xTaskHandle *)pvParameters;
+	xTaskHandle task = *(xTaskHandle *)pvParameters;
 	
 	while(1){
-		button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read Button 0
+		
+		while(!button_state0)
+			button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read Button 0
+		
 		if(!button_state0){
+			
 			vTaskSuspend(task);
-
 			led0->ovrc = LED0_BIT_VALUE;
 			vTaskDelayUntil(&xLastWakeTime, xFrequency);
 			led0->ovrs = LED0_BIT_VALUE;
@@ -128,13 +130,15 @@ void vbutton_TASK1(void* pvParameters)
 	portTickType xLastWakeTime;
 	const portTickType xFrequency = 60;
 	xLastWakeTime = xTaskGetTickCount();
-		xTaskHandle task;
-		task=*(xTaskHandle *)pvParameters;
+	xTaskHandle task  = *(xTaskHandle *)pvParameters;
 	
 	while(1){
 		
-		button_state1 = AVR32_GPIO.port[BUTTON_PORT1].pvr & BUTTON_PIN1; //Read Button 1
+		while(button_state1)
+			button_state1 = AVR32_GPIO.port[BUTTON_PORT1].pvr & BUTTON_PIN1;
+		
 		if(!button_state1){
+			
 			vTaskSuspend(task);
 			led1->ovrc = LED1_BIT_VALUE;
 			vTaskDelayUntil(&xLastWakeTime, xFrequency);
@@ -154,13 +158,15 @@ void vbutton_TASK2(void* pvParameters)
 	portTickType xLastWakeTime;
 	const portTickType xFrequency = 60;
 	xLastWakeTime = xTaskGetTickCount();
-	xTaskHandle task;
-	task=*(xTaskHandle *)pvParameters;
+	xTaskHandle task = *(xTaskHandle *)pvParameters;
 
 	while(1){
 		
-		button_state2 = AVR32_GPIO.port[BUTTON_PORT2].pvr & BUTTON_PIN2; //Read Button 2
+		while(button_state2)
+			button_state2 = AVR32_GPIO.port[BUTTON_PORT2].pvr & BUTTON_PIN2; //Read Button 2
+		
 		if(!button_state2){
+			
 			vTaskSuspend(task);
 			led2->ovrc = LED2_BIT_VALUE;
 			vTaskDelayUntil(&xLastWakeTime, xFrequency);
@@ -179,15 +185,13 @@ int main(void)
 
 	
 	init_LED();
-	xTaskCreate(vLED_TASK0, "LEDx", 256, NULL, tskIDLE_PRIORITY+1, &(blinkHandle[0]));
-	xTaskCreate(vLED_TASK1, "LEDx", 256, NULL, tskIDLE_PRIORITY+1, &(blinkHandle[1]));
-	xTaskCreate(vLED_TASK2, "LEDx", 256, NULL, tskIDLE_PRIORITY+1, &(blinkHandle[2]));
-	xTaskCreate(vbutton_TASK0, "button2", 256, &(blinkHandle[0]), tskIDLE_PRIORITY+1, &(buttonHandle[0]));
-	xTaskCreate(vbutton_TASK1, "button2", 256, &(blinkHandle[1]), tskIDLE_PRIORITY+1, &(buttonHandle[1]));
-	xTaskCreate(vbutton_TASK2, "button2", 256, &(blinkHandle[2]), tskIDLE_PRIORITY+1, &(buttonHandle[2]));
+	xTaskCreate(vLED_TASK0, "LED0", 256, NULL, tskIDLE_PRIORITY+1, &(blinkHandle[0]));
+	xTaskCreate(vLED_TASK1, "LED1", 256, NULL, tskIDLE_PRIORITY+1, &(blinkHandle[1]));
+	xTaskCreate(vLED_TASK2, "LED2", 256, NULL, tskIDLE_PRIORITY+1, &(blinkHandle[2]));
+	xTaskCreate(vbutton_TASK0, "BUTTON0", 256, &(blinkHandle[0]), tskIDLE_PRIORITY+1, NULL);
+	xTaskCreate(vbutton_TASK1, "BUTTON1", 256, &(blinkHandle[1]), tskIDLE_PRIORITY+1, NULL);
+	xTaskCreate(vbutton_TASK2, "BUTTON2", 256, &(blinkHandle[2]), tskIDLE_PRIORITY+1, NULL);
 	vTaskStartScheduler();	
 	while(1);
-	//button0_state = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read Button 0
-	//button1_state = AVR32_GPIO.port[BUTTON_PORT1].pvr & BUTTON_PIN1; //Read Button 1
-	//button2_state = AVR32_GPIO.port[BUTTON_PORT2].pvr & BUTTON_PIN2; //Read Button 2
+
 }
