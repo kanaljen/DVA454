@@ -1,4 +1,5 @@
 #include "functions.h"
+#include <stdio.h>
 
 void USART_init(void)
 {
@@ -55,14 +56,12 @@ void vLED_TASK0(void* pvParameters)
 	const portTickType xFrequency = 1000;
 
 	while(1)
-	{
-		xLastWakeTime = xTaskGetTickCount();
+	{	
+		taskENTER_CRITICAL();
+		usart_write_line(configDBG_USART , "LED 0 toggled\n");
+		taskEXIT_CRITICAL();
+		
 		led0->ovrt = LED0_BIT_VALUE;
-		usart_write_line(configDBG_USART , "LED 0 toggled\n"); 
-		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
-		led0->ovrt = LED0_BIT_VALUE;
-		usart_write_line(configDBG_USART , "LED 0 toggled\n"); 
 		xLastWakeTime = xTaskGetTickCount();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
@@ -75,14 +74,11 @@ void vLED_TASK1(void* pvParameters)
 
 	while(1)
 	{
+		taskENTER_CRITICAL();
+		usart_write_line(configDBG_USART , "LED 1 toggled\n");
+		taskEXIT_CRITICAL();
 		
 		led1->ovrt = LED1_BIT_VALUE;
-		usart_write_line(configDBG_USART , "LED 1 toggled\n"); 
-		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
-		
-		led1->ovrt = LED1_BIT_VALUE;
-		usart_write_line(configDBG_USART , "LED 1 toggled\n"); 
 		xLastWakeTime = xTaskGetTickCount();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
@@ -95,13 +91,11 @@ void vLED_TASK2(void* pvParameters)
 
 	while(1)
 	{
-		xLastWakeTime = xTaskGetTickCount();
+		taskENTER_CRITICAL();
+		usart_write_line(configDBG_USART , "LED 2 toggled\n");
+		taskEXIT_CRITICAL();
+		
 		led2->ovrt = LED2_BIT_VALUE;
-		usart_write_line(configDBG_USART , "LED 2 toggled\n"); 
-		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
-		led2->ovrt = LED2_BIT_VALUE;
-		usart_write_line(configDBG_USART , "LED 2 toggled\n"); 
 		xLastWakeTime = xTaskGetTickCount();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
@@ -117,19 +111,28 @@ void vbutton_TASK0(void* pvParameters)
 	while(1){
 		
 		while(button_state0)
-		button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0;
+			button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0;
 		
 		if(!button_state0){
-			usart_write_line(configDBG_USART , "Button 0 pressed\n"); 
+			taskENTER_CRITICAL();
+			usart_write_line(configDBG_USART , "Button 0 pressed\n");
+			taskEXIT_CRITICAL();
+			 
 			vTaskSuspend(task);
+			
 			led0->ovrc = LED0_BIT_VALUE;
-			usart_write_line(configDBG_USART , "LED 0 toggled\n"); 
-			xLastWakeTime = xTaskGetTickCount();
+			
+			taskENTER_CRITICAL();
+			usart_write_line(configDBG_USART , "LED 0 toggled for 10 seconds\n");
+			taskEXIT_CRITICAL();
+			
+			xLastWakeTime = xTaskGetTickCount(); 
 			vTaskDelayUntil(&xLastWakeTime, xFrequency);
+		
 			vTaskResume(task);
 			
 			while(!button_state0)
-			button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read Button 1
+				button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read Button 1
 		}
 	}
 }
@@ -141,22 +144,33 @@ void vbutton_TASK1(void* pvParameters)
 	const portTickType xFrequency = 10000;
 	xTaskHandle task  = *(xTaskHandle *)pvParameters;
 	
+	
 	while(1){
 		
 		while(button_state1)
-		button_state1 = AVR32_GPIO.port[BUTTON_PORT1].pvr & BUTTON_PIN1;
+			button_state1 = AVR32_GPIO.port[BUTTON_PORT1].pvr & BUTTON_PIN1;
 		
 		if(!button_state1){
+			
+			taskENTER_CRITICAL();
 			usart_write_line(configDBG_USART , "Button 1 pressed\n"); 
+			taskEXIT_CRITICAL();
+			
 			vTaskSuspend(task);
+			
 			led1->ovrc = LED1_BIT_VALUE;
-			usart_write_line(configDBG_USART , "LED 1 toggled\n"); 
+			
+			taskENTER_CRITICAL();
+			usart_write_line(configDBG_USART , "LED 1 toggled for 10 seconds\n"); 
+			taskEXIT_CRITICAL();
+			
 			xLastWakeTime = xTaskGetTickCount();
 			vTaskDelayUntil(&xLastWakeTime, xFrequency);
+			
 			vTaskResume(task);
 			
 			while(!button_state1)
-			button_state1 = AVR32_GPIO.port[BUTTON_PORT1].pvr & BUTTON_PIN1; //Read Button 1
+				button_state1 = AVR32_GPIO.port[BUTTON_PORT1].pvr & BUTTON_PIN1; //Read Button 1
 		}
 	}
 }
@@ -167,23 +181,32 @@ void vbutton_TASK2(void* pvParameters)
 	portTickType xLastWakeTime;
 	const portTickType xFrequency = 10000;
 	xTaskHandle task = *(xTaskHandle *)pvParameters;
-
+	
+	
 	while(1){
 		
 		while(button_state2)
-		button_state2 = AVR32_GPIO.port[BUTTON_PORT2].pvr & BUTTON_PIN2; //Read Button 2
+			button_state2 = AVR32_GPIO.port[BUTTON_PORT2].pvr & BUTTON_PIN2; //Read Button 2
 		
 		if(!button_state2){
-			usart_write_line(configDBG_USART , "Button 2 pressed\n"); 
+			
+			taskENTER_CRITICAL();
+			usart_write_line(configDBG_USART , "Button 2 pressed\n");
+			taskEXIT_CRITICAL();
 			vTaskSuspend(task);
+			
 			led2->ovrc = LED2_BIT_VALUE;
-			usart_write_line(configDBG_USART , "LED 2 toggled\n"); 
+			taskENTER_CRITICAL();
+			usart_write_line(configDBG_USART , "LED 2 toggled for 10 seconds\n"); 
+			taskEXIT_CRITICAL();
+			
 			xLastWakeTime = xTaskGetTickCount();
 			vTaskDelayUntil(&xLastWakeTime, xFrequency);
+			
 			vTaskResume(task);
 			
 			while(!button_state2)
-			button_state2 = AVR32_GPIO.port[BUTTON_PORT2].pvr & BUTTON_PIN2; //Read Button 2
+				button_state2 = AVR32_GPIO.port[BUTTON_PORT2].pvr & BUTTON_PIN2; //Read Button 2
 		}
 	}
 }
