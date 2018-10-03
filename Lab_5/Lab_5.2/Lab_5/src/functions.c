@@ -27,7 +27,7 @@ void USART_init(void)
 	usart_init_rs232(serialPORT_USART , &USART_OPTIONS , FOSC0);
 	usart_init_rs232(configDBG_USART , &USART_OPTIONS , FOSC0);
 	
-	usart_write_line(configDBG_USART , "USART Initialized\n"); 
+	usart_write_line(configDBG_USART , "USART Initialized\n");
 	
 }
 void init_LED(void)
@@ -47,92 +47,114 @@ void init_LED(void)
 	led2_port->ovrs = LED2_BIT_VALUE; //Set output value register
 	led2_port->oders = LED2_BIT_VALUE; //Set output drive register
 	
-	usart_write_line(configDBG_USART , "LEDs Initialized\n"); 
+	usart_write_line(configDBG_USART , "LEDs Initialized\n");
 }
 void vLED_TASK0(void* pvParameters)
 {
 	volatile avr32_gpio_port_t * led0 = &AVR32_GPIO.port[LED0_PORT];
 	portTickType xLastWakeTime;
+	portTickType StartTime, EndTime;
 	const portTickType xFrequency = 1000;
+	const portTickType tLimit = 2000;
 
 	while(1)
-	{	
-		taskENTER_CRITICAL();
-		usart_write_line(configDBG_USART , "LED 0 toggled\n");
-		taskEXIT_CRITICAL();
+	{
 		
-		led0->ovrt = LED0_BIT_VALUE;
+		StartTime = xTaskGetTickCount();
+		
+		//take semaphore
+		led0->ovrc = LED1_BIT_VALUE;
+		usart_write_line(configDBG_USART , "LED 0 toggled\n");
 		xLastWakeTime = xTaskGetTickCount();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
+		led0->ovrs = LED1_BIT_VALUE;
+		//give semaphore
+		
+		EndTime = xTaskGetTickCount();
+		
+		if((EndTime - StartTime) > tLimit)
+		{
+			taskENTER_CRITICAL();
+			usart_write_line(configDBG_USART, "DEADLINE MISS - Task A");
+			taskEXIT_CRITICAL();
+		}
+		else
+		{
+			xLastWakeTime = xTaskGetTickCount();
+			vTaskDelayUntil(&xLastWakeTime, tLimit - (EndTime - StartTime));
+		}
 	}
 }
 void vLED_TASK1(void* pvParameters)
 {
 	volatile avr32_gpio_port_t * led1 = &AVR32_GPIO.port[LED1_PORT];
 	portTickType xLastWakeTime;
+	portTickType StartTime, EndTime;
 	const portTickType xFrequency = 2000;
+	const portTickType tLimit = 4000;
 
 	while(1)
 	{
-		taskENTER_CRITICAL();
-		usart_write_line(configDBG_USART , "LED 1 toggled\n");
-		taskEXIT_CRITICAL();
 		
-		led1->ovrt = LED1_BIT_VALUE;
+		StartTime = xTaskGetTickCount();
+		
+		//take semaphore
+		led1->ovrc = LED1_BIT_VALUE;
+		usart_write_line(configDBG_USART , "LED 1 toggled\n");
 		xLastWakeTime = xTaskGetTickCount();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
+		led1->ovrs = LED1_BIT_VALUE;
+		//give semaphore
+		
+		EndTime = xTaskGetTickCount();
+		
+		if((EndTime - StartTime) > tLimit)
+		{
+			taskENTER_CRITICAL();
+			usart_write_line(configDBG_USART, "DEADLINE MISS - Task B");
+			taskEXIT_CRITICAL();
+		}
+		else
+		{
+			xLastWakeTime = xTaskGetTickCount();
+			vTaskDelayUntil(&xLastWakeTime, tLimit - (EndTime - StartTime));
+		}
+		
 	}
 }
 void vLED_TASK2(void* pvParameters)
 {
 	volatile avr32_gpio_port_t * led2 = &AVR32_GPIO.port[LED2_PORT];
 	portTickType xLastWakeTime;
+	portTickType StartTime, EndTime;
 	const portTickType xFrequency = 3000;
-
+	const portTickType tLimit = 6000;
+	
 	while(1)
 	{
-		taskENTER_CRITICAL();
-		usart_write_line(configDBG_USART , "LED 2 toggled\n");
-		taskEXIT_CRITICAL();
 		
-		led2->ovrt = LED2_BIT_VALUE;
+		StartTime = xTaskGetTickCount();
+		
+		//take semaphore
+		led2->ovrc = LED1_BIT_VALUE;
+		usart_write_line(configDBG_USART , "LED 2 toggled\n");
 		xLastWakeTime = xTaskGetTickCount();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
-	}
-}
-void vbutton_TASK0(void* pvParameters)
-{
-	volatile int button_state0; //Initialize button state 0
-	volatile avr32_gpio_port_t * led0 = &AVR32_GPIO.port[LED0_PORT];
-	portTickType xLastWakeTime;
-	const portTickType xFrequency = 10000;
-	xTaskHandle task  = *(xTaskHandle *)pvParameters;
-	
-	while(1){
+		led2->ovrs = LED1_BIT_VALUE;
+		//give semaphore
 		
-		while(button_state0)
-			button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0;
+		EndTime = xTaskGetTickCount();
 		
-		if(!button_state0){
+		if((EndTime - StartTime) > tLimit)
+		{
 			taskENTER_CRITICAL();
-			usart_write_line(configDBG_USART , "Button 0 pressed\n");
+			usart_write_line(configDBG_USART, "DEADLINE MISS - Task C");
 			taskEXIT_CRITICAL();
-			 
-			vTaskSuspend(task);
-			
-			led0->ovrc = LED0_BIT_VALUE;
-			
-			taskENTER_CRITICAL();
-			usart_write_line(configDBG_USART , "LED 0 toggled for 10 seconds\n");
-			taskEXIT_CRITICAL();
-			
-			xLastWakeTime = xTaskGetTickCount(); 
-			vTaskDelayUntil(&xLastWakeTime, xFrequency);
-		
-			vTaskResume(task);
-			
-			while(!button_state0)
-				button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read Button 1
+		}
+		else
+		{
+			xLastWakeTime = xTaskGetTickCount();
+			vTaskDelayUntil(&xLastWakeTime, tLimit - (EndTime - StartTime));
 		}
 	}
 }
