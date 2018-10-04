@@ -7,11 +7,14 @@
 #include "pm.h"
 #include "usart.h"
 #include "gpio.h"
+#include "semphr.h"
 
 
 #ifndef FUNCTIONS_H_
 #define FUNCTIONS_H_
 
+#define TRUE 1
+#define FALSE 0
 #define GPIO_MAX_PIN_NUMBER 32
 
 //Define LED 0

@@ -54,29 +54,37 @@ void vLED_TASK0(void* pvParameters)
 	volatile avr32_gpio_port_t * led0 = &AVR32_GPIO.port[LED0_PORT];
 	portTickType xLastWakeTime;
 	portTickType StartTime, EndTime;
-	const portTickType xFrequency = 1000;
-	const portTickType tLimit = 2000;
+	const portTickType xFrequency = 4000;
+	const portTickType tLimit = 5000;
+	xSemaphoreHandle xSem = *(xSemaphoreHandle*)pvParameters;
+	int DeadlineMiss = FALSE;
 
 	while(1)
 	{
-		
 		StartTime = xTaskGetTickCount();
-		
-		//take semaphore
-		led0->ovrc = LED1_BIT_VALUE;
-		usart_write_line(configDBG_USART , "LED 0 toggled\n");
-		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
-		led0->ovrs = LED1_BIT_VALUE;
-		//give semaphore
-		
+		if(xSemaphoreTake(xSem, tLimit - xFrequency + 1))
+		{
+			led0->ovrc = LED0_BIT_VALUE;
+			usart_write_line(configDBG_USART , "Task A - Semaphore Take\n");
+			xLastWakeTime = xTaskGetTickCount();
+			vTaskDelayUntil(&xLastWakeTime, xFrequency);
+			led0->ovrs = LED0_BIT_VALUE;
+			usart_write_line(configDBG_USART , "Task A - Semaphore Give\n");
+			xSemaphoreGive(xSem);
+		}
+		else
+		{
+			xLastWakeTime = xTaskGetTickCount();
+			vTaskDelayUntil(&xLastWakeTime, xFrequency - 1);
+			DeadlineMiss = TRUE;
+		}
 		EndTime = xTaskGetTickCount();
-		
-		if((EndTime - StartTime) > tLimit)
+		if(DeadlineMiss)
 		{
 			taskENTER_CRITICAL();
-			usart_write_line(configDBG_USART, "DEADLINE MISS - Task A");
+			usart_write_line(configDBG_USART, "DEADLINE MISS - Task A\n");
 			taskEXIT_CRITICAL();
+			DeadlineMiss = FALSE;
 		}
 		else
 		{
@@ -90,36 +98,43 @@ void vLED_TASK1(void* pvParameters)
 	volatile avr32_gpio_port_t * led1 = &AVR32_GPIO.port[LED1_PORT];
 	portTickType xLastWakeTime;
 	portTickType StartTime, EndTime;
-	const portTickType xFrequency = 2000;
-	const portTickType tLimit = 4000;
+	const portTickType xFrequency = 4000;
+	const portTickType tLimit = 10000;
+	xSemaphoreHandle xSem = *(xSemaphoreHandle*)pvParameters;
+	int DeadlineMiss = FALSE;
 
 	while(1)
 	{
-		
 		StartTime = xTaskGetTickCount();
-		
-		//take semaphore
-		led1->ovrc = LED1_BIT_VALUE;
-		usart_write_line(configDBG_USART , "LED 1 toggled\n");
-		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
-		led1->ovrs = LED1_BIT_VALUE;
-		//give semaphore
-		
+		if(xSemaphoreTake(xSem, tLimit - xFrequency + 1))
+		{
+			led1->ovrc = LED1_BIT_VALUE;
+			usart_write_line(configDBG_USART , "Task B - Semaphore Take\n");
+			xLastWakeTime = xTaskGetTickCount();
+			vTaskDelayUntil(&xLastWakeTime, xFrequency);
+			led1->ovrs = LED1_BIT_VALUE;
+			usart_write_line(configDBG_USART , "Task B - Semaphore Give\n");
+			xSemaphoreGive(xSem);			
+		}
+		else
+		{
+			xLastWakeTime = xTaskGetTickCount();
+			vTaskDelayUntil(&xLastWakeTime, xFrequency - 1);
+			DeadlineMiss = TRUE;
+		}
 		EndTime = xTaskGetTickCount();
-		
-		if((EndTime - StartTime) > tLimit)
+		if(DeadlineMiss)
 		{
 			taskENTER_CRITICAL();
-			usart_write_line(configDBG_USART, "DEADLINE MISS - Task B");
+			usart_write_line(configDBG_USART, "DEADLINE MISS - Task B\n");
 			taskEXIT_CRITICAL();
+			DeadlineMiss = FALSE;
 		}
 		else
 		{
 			xLastWakeTime = xTaskGetTickCount();
 			vTaskDelayUntil(&xLastWakeTime, tLimit - (EndTime - StartTime));
 		}
-		
 	}
 }
 void vLED_TASK2(void* pvParameters)
@@ -127,29 +142,37 @@ void vLED_TASK2(void* pvParameters)
 	volatile avr32_gpio_port_t * led2 = &AVR32_GPIO.port[LED2_PORT];
 	portTickType xLastWakeTime;
 	portTickType StartTime, EndTime;
-	const portTickType xFrequency = 3000;
-	const portTickType tLimit = 6000;
+	const portTickType xFrequency = 4000;
+	const portTickType tLimit = 15000;
+	xSemaphoreHandle xSem = *(xSemaphoreHandle*)pvParameters;
+	int DeadlineMiss = FALSE;
 	
 	while(1)
 	{
-		
 		StartTime = xTaskGetTickCount();
-		
-		//take semaphore
-		led2->ovrc = LED1_BIT_VALUE;
-		usart_write_line(configDBG_USART , "LED 2 toggled\n");
-		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
-		led2->ovrs = LED1_BIT_VALUE;
-		//give semaphore
-		
+		if(xSemaphoreTake(xSem, tLimit - xFrequency + 1))
+		{
+			led2->ovrc = LED2_BIT_VALUE;
+			usart_write_line(configDBG_USART , "Task C - Semaphore Take\n");
+			xLastWakeTime = xTaskGetTickCount();
+			vTaskDelayUntil(&xLastWakeTime, xFrequency);
+			led2->ovrs = LED2_BIT_VALUE;
+			xSemaphoreGive(xSem);
+			usart_write_line(configDBG_USART , "Task C - Semaphore Give\n");
+		}
+		else
+		{
+			xLastWakeTime = xTaskGetTickCount();
+			vTaskDelayUntil(&xLastWakeTime, xFrequency - 1);
+			DeadlineMiss = TRUE;
+		}
 		EndTime = xTaskGetTickCount();
-		
-		if((EndTime - StartTime) > tLimit)
+		if(DeadlineMiss)
 		{
 			taskENTER_CRITICAL();
-			usart_write_line(configDBG_USART, "DEADLINE MISS - Task C");
+			usart_write_line(configDBG_USART, "DEADLINE MISS - Task C\n");
 			taskEXIT_CRITICAL();
+			DeadlineMiss = FALSE;
 		}
 		else
 		{
