@@ -1,14 +1,14 @@
 #include "functions.h"
 #include <stdio.h>
 
-#define CYCLES_PER_MS (1000)
+#define CYCLES_PER_MS (1091) //12000000/(1000*11)
 #define releaseA 500
 #define releaseB 500
 #define releaseC 0
 #define taskTime 4000
-#define deadlineA 6000	
-#define deadlineB 8000	
-#define deadlineC 10000
+#define deadlineA 12000	
+#define deadlineB 13000	
+#define deadlineC 14000
 #define lastDeadline deadlineC+1000
 
 void mdelay(int ms){
@@ -84,22 +84,25 @@ void vLED_TASK0(void* pvParameters)
 		StartTime = xTaskGetTickCount();
 		xLastWakeTime = xTaskGetTickCount();
 		vTaskDelayUntil(&xLastWakeTime, release);
-		
+		usart_write_line(configDBG_USART, "Start - Task A\n");
 		if(xSemaphoreTake(xSem, tLimit))
 		{
 			usart_write_line(configDBG_USART , "Task A - Semaphore Take\n");
 			led0->ovrc = LED0_BIT_VALUE;
-			
 			mdelay(taskTime);
-			
 			led0->ovrs = LED0_BIT_VALUE;
-			usart_write_line(configDBG_USART , "Task A - Semaphore Give\n");
-			xSemaphoreGive(xSem);
+
+			
 		}
-				
+			
 		EndTime = xTaskGetTickCount();
 		if(deadlineA < EndTime )
 			usart_write_line(configDBG_USART, "DEADLINE MISS - Task A\n");
+		else
+			usart_write_line(configDBG_USART, "Success - Task A\n");
+			
+		usart_write_line(configDBG_USART , "Task A - Semaphore Give\n");
+		xSemaphoreGive(xSem);
 
 	}
 }
@@ -119,7 +122,8 @@ void vLED_TASK1(void* pvParameters)
 	{
 		StartTime = xTaskGetTickCount();
 		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, release);		
+		vTaskDelayUntil(&xLastWakeTime, release);
+		usart_write_line(configDBG_USART, "Start - Task B\n");		
 // 		if(xSemaphoreTake(xSem, tLimit))
 // 		{
 //			usart_write_line(configDBG_USART , "Task B - Semaphore Take\n");
@@ -135,6 +139,8 @@ void vLED_TASK1(void* pvParameters)
 		EndTime = xTaskGetTickCount();
 		if(deadlineA < EndTime )
 			usart_write_line(configDBG_USART, "DEADLINE MISS - Task A\n");
+		else
+			usart_write_line(configDBG_USART, "Success - Task B\n");
 
 		xLastWakeTime = xTaskGetTickCount();
 		vTaskDelayUntil(&xLastWakeTime, reset);
@@ -156,19 +162,23 @@ void vLED_TASK2(void* pvParameters)
 	{
 		StartTime = xTaskGetTickCount();
 		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, release);		
+		vTaskDelayUntil(&xLastWakeTime, release);	
+		usart_write_line(configDBG_USART, "Start - Task C\n");	
 		if(xSemaphoreTake(xSem, tLimit))
 		{
 			usart_write_line(configDBG_USART , "Task C - Semaphore Take\n");
 			led2->ovrc = LED2_BIT_VALUE;
 			mdelay(taskTime);
 			led2->ovrs = LED2_BIT_VALUE;
-			usart_write_line(configDBG_USART , "Task C - Semaphore Give\n");
-			xSemaphoreGive(xSem);
 		}
 		
 		EndTime = xTaskGetTickCount();
-		if(deadlineA < EndTime )
+		if(deadlineC < EndTime )
 			usart_write_line(configDBG_USART, "DEADLINE MISS - Task C\n");	
+		else
+			usart_write_line(configDBG_USART, "Success - Task C\n");	
+		
+		usart_write_line(configDBG_USART , "Task C - Semaphore Give\n");	
+		xSemaphoreGive(xSem);
 	}
 }
