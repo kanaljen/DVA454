@@ -5,67 +5,55 @@ void USART_init(volatile avr32_usart_t * usart)
 	//Reset
 	USART_reset(usart);
 	
-	//Mode register MR
-	usart->MR.mode = 0;          //Mode, normal 0000
+	// Mode register MR
 	usart->MR.usclks = 0;        //Clock selection, USART_CLK selected
+	usart->MR.mode9 = 0;         //9-bit character length
 	usart->MR.chrl = 3;          //Character length (8 bit)
 	usart->MR.sync = 0;          //Synchronous mode select, async selected
 	usart->MR.par = 4;           //Parity type (No parity)
 	usart->MR.nbstop = 0;        //Number of stop bits (1 stop bit)
 	usart->MR.chmode = 0;        //Channel mode (normal)
-	usart->MR.msbf = 0;          //Bit order
-	usart->MR.mode9 = 0;         //9-bit character length
-	usart->MR.clko = 1;          //Clock output select (USART drives CLK pin)
 	usart->MR.over = 0;          //Oversampling mode (16x)
-	usart->MR.inack = 0;         //Inhibit non acknowledge (nack is generated)
-	usart->MR.dsnack = 0;        //Disable successive NACK
-	usart->MR.var_sync = 0;      //Variable synchronization of Command
-	usart->MR.max_iteration = 0; //Max iterations in ISO7816 mode
-	usart->MR.filter = 0;        //Infrared receiver line filter 
-	usart->MR.man = 0;           //Manchester encoder enable
-	usart->MR.modsync = 0;       //Manchester synchronization mode
-	usart->MR.onebit = 0;        //Start frame delimiter selector
 	
 	//Baud Rate Generator Register
 	usart->BRGR.fp = 0;    // No fraction needed
-	usart->BRGR.cd = 78;   // 12 000 000 / (8*9600(2 - 0)) = 78.125 
-	
-	//Enable txrdy interrupt
-	//usart->IER.txrdy = 1;
+	int CD = 12000000/(8*9600*(2-0));
+	usart->BRGR.cd = CD; 
 	
 	//Transmit Holding Register
 	usart->THR.txsynh = 0;   //The next char sent is encoded as a data (DATA SYNC)
 	
 	//Enable GPIO ports for communication
-	volatile avr32_gpio_port_t *usart_gpio = &AVR32_GPIO.port[0]; 
+	volatile avr32_gpio_port_t *gpio = &AVR32_GPIO.port[0]; 
 	
 	//Enable RXD pin in GPIO
-	//usart_gpio->oderc = 1 << 5;  //Disable output drivers
-	usart_gpio->gpers = 1 << 5;  //Make the GPIO control the pins
-	usart_gpio->pmr0c = 1 << 5;  //Select peripheral A (clear) {pmr1, pmr0} = 00
-	usart_gpio->pmr1c = 1 << 5;  //Select peripheral A (clear)
-	usart_gpio->gperc = 1 << 5;  //Enable peripheral control
+
+	gpio->gpers = 1 << USART_RXD_PIN;  //Make the GPIO control the pins
+	gpio->pmr0c = 1 << USART_RXD_PIN;  //Select peripheral A (clear) {pmr1, pmr0} = 00
+	gpio->pmr1c = 1 << USART_RXD_PIN;  //Select peripheral A (clear)
+	gpio->gperc = 1 << USART_RXD_PIN;  //Enable peripheral control
 	
 	//Enable TXD pin in GPIO
-	//usart_gpio->oderc = 1 << 6;  //Disable output drivers
-	usart_gpio->gpers = 1 << 6;  //Make the GPIO control the pins
-	usart_gpio->pmr0c = 1 << 6;  //Select peripheral A (clear) {pmr1, pmr0} = 00
-	usart_gpio->pmr1c = 1 << 6;  //Select peripheral A (clear)
-	usart_gpio->gperc = 1 << 6;  //Enable peripheral control
+
+	gpio->gpers = 1 << USART_TXD_PIN;  //Make the GPIO control the pins
+	gpio->pmr0c = 1 << USART_TXD_PIN;  //Select peripheral A (clear) {pmr1, pmr0} = 00
+	gpio->pmr1c = 1 << USART_TXD_PIN;  //Select peripheral A (clear)
+	gpio->gperc = 1 << USART_TXD_PIN;  //Enable peripheral control
 	
 	//Enable CLK pin in GPIO
-	//usart_gpio->oderc = 1 << 7;  //Disable output drivers
-	usart_gpio->gpers = 1 << 7;  //Make the GPIO control the pins
-	usart_gpio->pmr0c = 1 << 7;  //Select peripheral A (clear) {pmr1, pmr0} = 00
-	usart_gpio->pmr1c = 1 << 7;  //Select peripheral A (clear)
-	usart_gpio->gperc = 1 << 7;  //Enable peripheral control
+
+	gpio->gpers = 1 << AVR32_USART1_CLK_0_PIN;  //Make the GPIO control the pins
+	gpio->pmr0c = 1 << AVR32_USART1_CLK_0_PIN;  //Select peripheral A (clear) {pmr1, pmr0} = 00
+	gpio->pmr1c = 1 << AVR32_USART1_CLK_0_PIN;  //Select peripheral A (clear)
+	gpio->gperc = 1 << AVR32_USART1_CLK_0_PIN;  //Enable peripheral control
 	
-	volatile avr32_pm_t *usart_PM = &AVR32_PM; 
-	usart_PM->OSCCTRL0.mode = 4;    //Crystal is connected to xin/xout with gain G0
-	usart_PM->OSCCTRL0.startup = 6; //Startup time 142 ms
-	usart_PM->MCCTRL.osc0en = 1;    //Oscillator 0 ENABLED
-	usart_PM->MCCTRL.osc1en = 0;    //Oscillator 1 DISABLED
-	usart_PM->MCCTRL.mcsel = 1;     //Oscillator 0 is the source for the main clock	
+	volatile avr32_pm_t *PM = &AVR32_PM; 
+	PM->OSCCTRL0.mode = 4;    //Crystal is connected to xin/xout with gain G0
+	PM->OSCCTRL0.startup = 6; //Startup time 142 ms
+	PM->MCCTRL.osc0en = 1;    //Oscillator 0 ENABLED
+	PM->MCCTRL.osc1en = 0;    //Oscillator 1 DISABLED
+	PM->MCCTRL.mcsel = 1;     //Oscillator 0 is the source for the main clock	
+	
 }
 
 char USART_getChar()

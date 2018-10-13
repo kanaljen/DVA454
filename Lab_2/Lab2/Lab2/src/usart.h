@@ -1,5 +1,6 @@
 #include "avr32\usart_400.h"
 #include "avr32\uc3a0512.h"
+#include "evk1100.h"
 
 #ifndef FUNCTIONS_H_
 #define FUNCTIONS_H_
