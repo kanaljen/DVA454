@@ -1,16 +1,16 @@
 #include "compiler.h"
 #include "board.h"
-#include "functions.h"
+#include "usart.h"
 
 int main(void)
 {
 	volatile avr32_usart_t *usart = &AVR32_USART1;
-	char c;
+	char x;
 	USART_init(usart);
 	while(1)
 	{
-		c = USART_getChar();
-		USART_putChar(c);	
+		x = USART_getChar();
+		USART_putChar(x);	
 	}
 	return 0;
 }

@@ -1,46 +1,9 @@
-#include "functions.h"
-
-void USART_reset(volatile avr32_usart_t *usart)
-{
-	//Reset
-	usart->CR.rstrx = 1;   //Resets the receiver (1)
-	usart->CR.rsttx = 1;   //Resets the transmitter (1)
-	usart->CR.rststa = 1;  //Resets status bits (1)
-	usart->CR.rstnack = 1; //Reset non acknowledge (0)
-	
-	//"reset" the reset
-	usart->CR.rstrx = 0;   //Resets the receiver (0)
-	usart->CR.rsttx = 0;   //Resets the transmitter (0)
-	usart->CR.rststa = 0;  //Resets status bits (0)
-	usart->CR.rstnack = 0; //Reset non acknowledge (0)
-	
-	//re-enables receiver and transmitter
-	usart->CR.rxdis = 0;   //Should be 0 to NOT disable receiver (0)
-	usart->CR.rxen =  1;   //Enables receiver (1)
-	usart->CR.txdis = 0;   //Should be 0 to NOT disable transmitter (0)
-	usart->CR.txen = 1;    //Enables the transmitter (1)
-
-}
+#include "usart.h"
 
 void USART_init(volatile avr32_usart_t * usart)
 {
-	
-	//Reset (Set all bits to 0 in the used registers)
+	//Reset
 	USART_reset(usart);
-	 
-	//Control Register
-	usart->CR.rxdis = 0;   //Should be 0 to NOT disable receiver (0)
-	usart->CR.rxen =  1;   //Enables receiver (1)
-	usart->CR.txdis = 0;   //Should be 0 to NOT disable transmitter (0)
-	usart->CR.txen = 1;    //Enables the transmitter (1)
-	usart->CR.sttbrk = 0;  //Start Break
-	usart->CR.stpbrk = 0;  //Stop Break 
-	usart->CR.sttto = 0;   //Start time-out 
-	usart->CR.senda = 0;   //Send address (In Multi drop mode only) (0)
-	usart->CR.rstit = 0;   //Reset Iterations (ISO7816 must be enabled) (0)
-	usart->CR.retto = 0;   //Restart time-out (0)
-	usart->CR.rtsen = 0;   //Request to send Enable 0
-	usart->CR.rtsdis = 0;  //Request to send Disable 0
 	
 	//Mode register MR
 	usart->MR.mode = 0;          //Mode, normal 0000
@@ -122,4 +85,25 @@ void USART_putChar(char c)
 	volatile avr32_usart_t *usart = &AVR32_USART1;
 	while(!usart->CSR.txrdy); //The transmitter reports to CSR txrdy = 1 which indicates that THR is empty and TXEMPTY is 0
 	usart->THR.txchr = c; //Receive whatever data is in the transmit holding register THR
+}
+void USART_reset(volatile avr32_usart_t *usart)
+{
+	//Reset
+	usart->CR.rstrx = 1;   //Resets the receiver (1)
+	usart->CR.rsttx = 1;   //Resets the transmitter (1)
+	usart->CR.rststa = 1;  //Resets status bits (1)
+	usart->CR.rstnack = 1; //Reset non acknowledge (0)
+	
+	//"reset" the reset
+	usart->CR.rstrx = 0;   //Resets the receiver (0)
+	usart->CR.rsttx = 0;   //Resets the transmitter (0)
+	usart->CR.rststa = 0;  //Resets status bits (0)
+	usart->CR.rstnack = 0; //Reset non acknowledge (0)
+	
+	//re-enables receiver and transmitter
+	usart->CR.rxdis = 0;   //Should be 0 to NOT disable receiver (0)
+	usart->CR.rxen =  1;   //Enables receiver (1)
+	usart->CR.txdis = 0;   //Should be 0 to NOT disable transmitter (0)
+	usart->CR.txen = 1;    //Enables the transmitter (1)
+
 }

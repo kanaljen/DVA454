@@ -85,7 +85,7 @@
     </AsfFrameworkConfig>
     <avrtool>com.atmel.avrdbg.tool.avrdragon</avrtool>
     <avrtoolinterface>JTAG</avrtoolinterface>
-    <avrtoolserialnumber>00A20000736D</avrtoolserialnumber>
+    <avrtoolserialnumber>00A200020223</avrtoolserialnumber>
     <avrdeviceexpectedsignature>0x0</avrdeviceexpectedsignature>
     <com_atmel_avrdbg_tool_avrdragon>
       <ToolOptions>
@@ -94,7 +94,7 @@
         <InterfaceName>JTAG</InterfaceName>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.avrdragon</ToolType>
-      <ToolNumber>00A20000736D</ToolNumber>
+      <ToolNumber>00A200020223</ToolNumber>
       <ToolName>AVR Dragon</ToolName>
     </com_atmel_avrdbg_tool_avrdragon>
   </PropertyGroup>
@@ -283,10 +283,10 @@
     <Folder Include="src\config\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\functions.c">
+    <Compile Include="src\usart.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\functions.h">
+    <Compile Include="src\usart.h">
       <SubType>compile</SubType>
     </Compile>
     <None Include="src\asf.h">
