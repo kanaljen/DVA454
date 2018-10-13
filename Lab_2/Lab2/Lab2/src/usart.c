@@ -51,7 +51,6 @@ void USART_init(volatile avr32_usart_t * usart)
 	PM->OSCCTRL0.mode = 4;    //Crystal is connected to xin/xout with gain G0
 	PM->OSCCTRL0.startup = 6; //Startup time 142 ms
 	PM->MCCTRL.osc0en = 1;    //Oscillator 0 ENABLED
-	PM->MCCTRL.osc1en = 0;    //Oscillator 1 DISABLED
 	PM->MCCTRL.mcsel = 1;     //Oscillator 0 is the source for the main clock	
 	
 }
