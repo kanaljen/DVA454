@@ -2,48 +2,47 @@
 
 void USART_init(volatile avr32_usart_t * usart)
 {
-	//Reset
+	// Reset USART
 	USART_reset(usart);
 	
-	// Mode register MR
-	usart->MR.usclks = 0;        //Clock selection, USART_CLK selected
-	usart->MR.mode9 = 0;         //9-bit character length
-	usart->MR.chrl = 3;          //Character length (8 bit)
-	usart->MR.sync = 0;          //Synchronous mode select, async selected
-	usart->MR.par = 4;           //Parity type (No parity)
-	usart->MR.nbstop = 0;        //Number of stop bits (1 stop bit)
-	usart->MR.chmode = 0;        //Channel mode (normal)
-	usart->MR.over = 0;          //Oversampling mode (16x)
+	// Mode Register
+	usart->MR.usclks = 0;        // CLK will be used as the input clock source for Baud Rate Generator
+	usart->MR.mode9 = 0;         // Disable 9-bit Character Length,chrl is used to set bits
+	usart->MR.chrl = 3;          // Character Length
+	usart->MR.sync = 0;          // Synchronous Mode Select, set to async
+	usart->MR.par = 4;           // No parity
+	usart->MR.nbstop = 0;        // Number of Stop Bits
+	usart->MR.chmode = 0;        // Channel Mode set to NORMAL
+	usart->MR.over = 0;          // Oversampling 8x
 	
-	//Baud Rate Generator Register
-	usart->BRGR.fp = 0;    // No fraction needed
-	int CD = 12000000/(8*9600*(2-0));
+	// Calculate Clock Divider
+	usart->BRGR.fp = 0;                 // No fraction
+	int CD = 12000000/(8*9600*(2-0));   // Calculate
 	usart->BRGR.cd = CD; 
-	
-	//Transmit Holding Register
+	 
+	// Prepare Holding Register
 	usart->THR.txsynh = 0;   //The next char sent is encoded as a data (DATA SYNC)
 	
-	//Enable GPIO ports for communication
+	// Get GPIO address
 	volatile avr32_gpio_port_t *gpio = &AVR32_GPIO.port[0]; 
 	
-	//Enable RXD pin in GPIO
+	//Enable Receive Data Pin in GPIO
 
-	gpio->gpers = 1 << USART_RXD_PIN;  //Make the GPIO control the pins
-	gpio->pmr0c = 1 << USART_RXD_PIN;  //Select peripheral A (clear) {pmr1, pmr0} = 00
-	gpio->pmr1c = 1 << USART_RXD_PIN;  //Select peripheral A (clear)
-	gpio->gperc = 1 << USART_RXD_PIN;  //Enable peripheral control
+	gpio->gpers = 1 << USART_RXD_PIN;  // GPIO Enable Register
+	gpio->pmr0c = 1 << USART_RXD_PIN;  // Peripheral MUX register
+	gpio->pmr1c = 1 << USART_RXD_PIN;  // 00 set USART1 - RXD
+	gpio->gperc = 1 << USART_RXD_PIN;  // GPIO Enable Register
 	
-	//Enable TXD pin in GPIO
+	//Enable Transmit Data Pin in GPIO
 
-	gpio->gpers = 1 << USART_TXD_PIN;  //Make the GPIO control the pins
-	gpio->pmr0c = 1 << USART_TXD_PIN;  //Select peripheral A (clear) {pmr1, pmr0} = 00
-	gpio->pmr1c = 1 << USART_TXD_PIN;  //Select peripheral A (clear)
-	gpio->gperc = 1 << USART_TXD_PIN;  //Enable peripheral control
+	gpio->gpers = 1 << USART_TXD_PIN;  // GPIO Enable Register
+	gpio->pmr0c = 1 << USART_TXD_PIN;  // Peripheral MUX register
+	gpio->pmr1c = 1 << USART_TXD_PIN;  // 00 set USART1 - RXD
+	gpio->gperc = 1 << USART_TXD_PIN;  // GPIO Enable Register
 	
 	//Enable CLK pin in GPIO
-
-	gpio->gpers = 1 << AVR32_USART1_CLK_0_PIN;  //Make the GPIO control the pins
-	gpio->pmr0c = 1 << AVR32_USART1_CLK_0_PIN;  //Select peripheral A (clear) {pmr1, pmr0} = 00
+	gpio->gpers = 1 << AVR32_USART1_CLK_0_PIN;  // Make the GPIO control the pins
+	gpio->pmr0c = 1 << AVR32_USART1_CLK_0_PIN;  // Select peripheral A (clear) {pmr1, pmr0} = 00
 	gpio->pmr1c = 1 << AVR32_USART1_CLK_0_PIN;  //Select peripheral A (clear)
 	gpio->gperc = 1 << AVR32_USART1_CLK_0_PIN;  //Enable peripheral control
 	
