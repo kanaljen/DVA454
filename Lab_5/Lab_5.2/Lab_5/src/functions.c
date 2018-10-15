@@ -96,7 +96,7 @@ void vLED_TASK0(void* pvParameters)
 		}
 			
 		EndTime = xTaskGetTickCount();
-		if(deadlineA < EndTime )
+		if(deadlineA < (EndTime-StartTime) )
 			usart_write_line(configDBG_USART, "DEADLINE MISS - Task A\n");
 		else
 			usart_write_line(configDBG_USART, "Success - Task A\n");
@@ -137,7 +137,7 @@ void vLED_TASK1(void* pvParameters)
 // 		}
 
 		EndTime = xTaskGetTickCount();
-		if(deadlineA < EndTime )
+		if(deadlineA < (EndTime-StartTime) )
 			usart_write_line(configDBG_USART, "DEADLINE MISS - Task A\n");
 		else
 			usart_write_line(configDBG_USART, "Success - Task B\n");
@@ -173,7 +173,7 @@ void vLED_TASK2(void* pvParameters)
 		}
 		
 		EndTime = xTaskGetTickCount();
-		if(deadlineC < EndTime )
+		if(deadlineC < (EndTime-StartTime) )
 			usart_write_line(configDBG_USART, "DEADLINE MISS - Task C\n");	
 		else
 			usart_write_line(configDBG_USART, "Success - Task C\n");	
