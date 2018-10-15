@@ -5,6 +5,16 @@ void USART_init(volatile avr32_usart_t * usart)
 	// Reset USART
 	USART_reset(usart);
 	
+	volatile avr32_pm_t *PM = &AVR32_PM;
+	// Oscillator 0 Control Register
+	PM->OSCCTRL0.mode = 4;				// Crystal is connected to XIN/XOUT - Oscillator is used with gain G0 ( XIN from 0.4 MHz to 0.9 MHz ).
+	PM->OSCCTRL0.startup = 6;			// Startup Time 142 ms
+	
+	// Main Clock Control
+	PM->MCCTRL.osc0en = 1;				// Oscillator 0 ENABLED
+	PM->MCCTRL.mcsel = 1;				// Oscillator 0 is the source for the main clock	
+
+	
 	// Mode Register
 	usart->MR.usclks = 0;        // CLK will be used as the input clock source for Baud Rate Generator
 	usart->MR.mode9 = 0;         // Disable 9-bit Character Length,chrl is used to set bits
@@ -26,31 +36,16 @@ void USART_init(volatile avr32_usart_t * usart)
 	// Get GPIO address
 	volatile avr32_gpio_port_t *gpio = &AVR32_GPIO.port[0]; 
 	
-	//Enable Receive Data Pin in GPIO
+	// Select function for RXD
 
-	gpio->gpers = 1 << USART_RXD_PIN;  // GPIO Enable Register
-	gpio->pmr0c = 1 << USART_RXD_PIN;  // Peripheral MUX register
-	gpio->pmr1c = 1 << USART_RXD_PIN;  // 00 set USART1 - RXD
-	gpio->gperc = 1 << USART_RXD_PIN;  // GPIO Enable Register
+	gpio->pmr0c = 1 << USART_RXD_PIN;	// Peripheral MUX register
+	gpio->pmr1c = 1 << USART_RXD_PIN;	// 00 set USART1 - RXD
+	gpio->gperc = 1 << USART_RXD_PIN;	// GPIO Enable Register
 	
-	//Enable Transmit Data Pin in GPIO
-
-	gpio->gpers = 1 << USART_TXD_PIN;  // GPIO Enable Register
-	gpio->pmr0c = 1 << USART_TXD_PIN;  // Peripheral MUX register
-	gpio->pmr1c = 1 << USART_TXD_PIN;  // 00 set USART1 - RXD
-	gpio->gperc = 1 << USART_TXD_PIN;  // GPIO Enable Register
-	
-	//Enable CLK pin in GPIO
-	gpio->gpers = 1 << AVR32_USART1_CLK_0_PIN;  // Make the GPIO control the pins
-	gpio->pmr0c = 1 << AVR32_USART1_CLK_0_PIN;  // Select peripheral A (clear) {pmr1, pmr0} = 00
-	gpio->pmr1c = 1 << AVR32_USART1_CLK_0_PIN;  //Select peripheral A (clear)
-	gpio->gperc = 1 << AVR32_USART1_CLK_0_PIN;  //Enable peripheral control
-	
-	volatile avr32_pm_t *PM = &AVR32_PM; 
-	PM->OSCCTRL0.mode = 4;    //Crystal is connected to xin/xout with gain G0
-	PM->OSCCTRL0.startup = 6; //Startup time 142 ms
-	PM->MCCTRL.osc0en = 1;    //Oscillator 0 ENABLED
-	PM->MCCTRL.mcsel = 1;     //Oscillator 0 is the source for the main clock	
+	// Select function for TXD
+	gpio->pmr0c = 1 << USART_TXD_PIN;	// Peripheral MUX register
+	gpio->pmr1c = 1 << USART_TXD_PIN;	// 00 set USART1 - TXD
+	gpio->gperc = 1 << USART_TXD_PIN;	// GPIO Enable Register
 	
 }
 
@@ -59,8 +54,8 @@ char USART_getChar()
 	volatile avr32_usart_t *usart = &AVR32_USART1;
 	char RX_HOLD;
 	
-	while(!usart->CSR.rxrdy); //rxrdy indicates that a complete character has been received and that rhr is enabled
-	if(!usart->RHR.rxsynh) //indicates that the received character is data and not a command
+	while(!usart->CSR.rxrdy);	// Receive Holding Register Ready
+	if(!usart->RHR.rxsynh)		// RXSYNH: Received Sync, 0 = Last Character received is a Data.
 	{
 		RX_HOLD = usart->RHR.rxchr; 
 	}
@@ -69,27 +64,23 @@ char USART_getChar()
 void USART_putChar(char c)
 {
 	volatile avr32_usart_t *usart = &AVR32_USART1;
-	while(!usart->CSR.txrdy); //The transmitter reports to CSR txrdy = 1 which indicates that THR is empty and TXEMPTY is 0
-	usart->THR.txchr = c; //Receive whatever data is in the transmit holding register THR
+	while(!usart->CSR.txrdy);	// Transmitter Ready
+	usart->THR.txchr = c;		// Next character to be transmitted after the current character if TXRDY is not set.
 }
 void USART_reset(volatile avr32_usart_t *usart)
 {
-	//Reset
-	usart->CR.rstrx = 1;   //Resets the receiver (1)
-	usart->CR.rsttx = 1;   //Resets the transmitter (1)
-	usart->CR.rststa = 1;  //Resets status bits (1)
-	usart->CR.rstnack = 1; //Reset non acknowledge (0)
+	// Enable RESET
+	usart->CR.rstrx = 1;   // Receiver
+	usart->CR.rsttx = 1;   // Transmitter
 	
-	//"reset" the reset
-	usart->CR.rstrx = 0;   //Resets the receiver (0)
-	usart->CR.rsttx = 0;   //Resets the transmitter (0)
-	usart->CR.rststa = 0;  //Resets status bits (0)
-	usart->CR.rstnack = 0; //Reset non acknowledge (0)
-	
-	//re-enables receiver and transmitter
-	usart->CR.rxdis = 0;   //Should be 0 to NOT disable receiver (0)
-	usart->CR.rxen =  1;   //Enables receiver (1)
-	usart->CR.txdis = 0;   //Should be 0 to NOT disable transmitter (0)
-	usart->CR.txen = 1;    //Enables the transmitter (1)
+	// Disable RESET
+	usart->CR.rstrx = 0;   // Receiver
+	usart->CR.rsttx = 0;   // Transmitter
+
+	// Enable Receiver/Transmitter
+	usart->CR.rxdis = 0;   // Do NOT disable Receiver
+	usart->CR.rxen =  1;   // DO enable Receiver
+	usart->CR.txdis = 0;   // Do NOT disable Transmitter
+	usart->CR.txen = 1;    // DO enable Transmitter
 
 }
