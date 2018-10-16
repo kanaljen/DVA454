@@ -41,24 +41,30 @@ void vProducerTask(void* pvParameters)
 	
 	while(1)
 	{	
-		if(itemCount = buffer_size)
+		if(itemCount == buffer_size)
 		{
-			vTaskSuspend(NULL);
+			taskENTER_CRITICAL();
 			usart_write_line(configDBG_USART, "Producer Sleeping\n");
+			taskEXIT_CRITICAL();
+			vTaskSuspend(NULL);
 		}  
 		
 		buffer[itemCount] = itemCount + 1;
 		item = buffer[itemCount];
 		itemCount++;
 		
-		if(itemCount > 0)
+		if(itemCount == 1)
 		{
+			taskENTER_CRITICAL();
+			usart_write_line(configDBG_USART, "Consumer Awakened\n");
+			taskEXIT_CRITICAL();
 			vTaskResume(ConsumerTaskHandle);
-			usart_write_line(configDBG_USART, "Producer Awaken\n");
 		}
 		
-		sprintf(char_buffer, "Item produced: %d\n", item);
+		sprintf(char_buffer, "Item %d produced\n", item);
+		taskENTER_CRITICAL();
 		usart_write_line(configDBG_USART , char_buffer);
+		taskEXIT_CRITICAL();
 		
 	}
 }
@@ -73,22 +79,28 @@ void vConsumerTask(void* pvParameters)
 	{
 		if(itemCount == 0)
 		{
-			vTaskSuspend(NULL);
+			taskENTER_CRITICAL();
 			usart_write_line(configDBG_USART, "Consumer Sleeping\n");
+			taskEXIT_CRITICAL();
+			vTaskSuspend(NULL);
 		}
 		
 		item = buffer[itemCount];
-		buffer[itemCount] = NULL;
+		buffer[itemCount] = -1;
 		itemCount--;
 		
-		if(itemCount < buffer_size)
+		if(itemCount == buffer_size - 1)
 		{
+			taskENTER_CRITICAL();
+			usart_write_line(configDBG_USART, "Producer Awakened\n");
+			taskEXIT_CRITICAL();
 			vTaskResume(ProducerTaskHandle);
-			usart_write_line(configDBG_USART, "Consumer Awaken\n");
 		}
 		
-		sprintf(char_buffer, "Item consumed: %d\n", item);
+		sprintf(char_buffer, "Item %d consumed\n", item);
+		taskENTER_CRITICAL();
 		usart_write_line(configDBG_USART , char_buffer);
+		taskEXIT_CRITICAL();
 		
 	}
 }
