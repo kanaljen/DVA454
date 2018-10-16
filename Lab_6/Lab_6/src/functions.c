@@ -2,6 +2,7 @@
 
 int buffer[buffer_size];
 int itemCount = 0;
+xSemaphoreHandle xSem;
 
 void USART_init(void)
 {
@@ -32,12 +33,19 @@ void USART_init(void)
 	usart_write_line(configDBG_USART , "USART Initialized\n");
 	
 }
+void vSemaphoreTask( void * pvParameters )
+{
+	vSemaphoreCreateBinary(xSem);	
+}
 
 void vProducerTask(void* pvParameters)
 {
 	xTaskHandle ConsumerTaskHandle = *(xTaskHandle *)pvParameters;
 	int item;
 	char char_buffer[16];
+	
+	//xSemaphoreTake(xSem, tLimit)
+	//xSemaphoreGive(xSem, tLimit)
 	
 	while(1)
 	{	
@@ -74,6 +82,9 @@ void vConsumerTask(void* pvParameters)
 	xTaskHandle ProducerTaskHandle = *(xTaskHandle *)pvParameters;
 	int item;
 	char char_buffer[16];
+	
+	//xSemaphoreTake(xSem, tLimit)
+	//xSemaphoreGive(xSem, tLimit)
 	
 	while(1)
 	{
