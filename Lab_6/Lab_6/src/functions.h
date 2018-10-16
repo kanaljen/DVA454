@@ -8,7 +8,7 @@
 #include "usart.h"
 #include "gpio.h"
 #include "semphr.h"
-
+#include "stdio.h"
 
 #ifndef FUNCTIONS_H_
 #define FUNCTIONS_H_
@@ -33,8 +33,10 @@
 #define serialPORT_USART_IRQ AVR32_USART1_IRQ
 #define serialPORT_USART_BAUDRATE 9600
 
+#define buffer_size 10
+
 void USART_init(void);
-void vLED_TASK0(void* pvParameters);
-void vLED_TASK1(void* pvParameters);
+void vProducerTask(void* pvParameters);
+void vConsumerTask(void* pvParameters);
 
 #endif /* FUNCTIONS_H_ */

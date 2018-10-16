@@ -1,8 +1,7 @@
 #include "functions.h"
-#include <stdio.h>
 
-
-
+int buffer[buffer_size];
+int itemCount = 0;
 
 void USART_init(void)
 {
@@ -34,21 +33,62 @@ void USART_init(void)
 	
 }
 
-void vLED_TASK0(void* pvParameters)
+void vProducerTask(void* pvParameters)
 {
-	xSemaphoreHandle xSem = *(xSemaphoreHandle*)pvParameters;
-
+	xTaskHandle ConsumerTaskHandle = *(xTaskHandle *)pvParameters;
+	int item;
+	char char_buffer[16];
+	
 	while(1)
-	{
-
+	{	
+		if(itemCount = buffer_size)
+		{
+			vTaskSuspend(NULL);
+			usart_write_line(configDBG_USART, "Producer Sleeping\n");
+		}  
+		
+		buffer[itemCount] = itemCount + 1;
+		item = buffer[itemCount];
+		itemCount++;
+		
+		if(itemCount > 0)
+		{
+			vTaskResume(ConsumerTaskHandle);
+			usart_write_line(configDBG_USART, "Producer Awaken\n");
+		}
+		
+		sprintf(char_buffer, "Item produced: %d\n", item);
+		usart_write_line(configDBG_USART , char_buffer);
+		
 	}
 }
-void vLED_TASK1(void* pvParameters)
+void vConsumerTask(void* pvParameters)
 {
-	xSemaphoreHandle xSem = *(xSemaphoreHandle*)pvParameters;
-
+	
+	xTaskHandle ProducerTaskHandle = *(xTaskHandle *)pvParameters;
+	int item;
+	char char_buffer[16];
+	
 	while(1)
 	{
-
+		if(itemCount == 0)
+		{
+			vTaskSuspend(NULL);
+			usart_write_line(configDBG_USART, "Consumer Sleeping\n");
+		}
+		
+		item = buffer[itemCount];
+		buffer[itemCount] = NULL;
+		itemCount--;
+		
+		if(itemCount < buffer_size)
+		{
+			vTaskResume(ProducerTaskHandle);
+			usart_write_line(configDBG_USART, "Consumer Awaken\n");
+		}
+		
+		sprintf(char_buffer, "Item consumed: %d\n", item);
+		usart_write_line(configDBG_USART , char_buffer);
+		
 	}
 }
