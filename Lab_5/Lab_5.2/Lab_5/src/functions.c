@@ -9,8 +9,9 @@
 #define deadlineA 12000	
 #define deadlineB 13000	
 #define deadlineC 14000
-#define lastDeadline deadlineC+1000
+#define lastDeadline (deadlineC+1000)
 
+//Active delay
 void mdelay(int ms){
 	long volatile cycles = (ms * CYCLES_PER_MS);
 	while (cycles != 0){
@@ -70,115 +71,124 @@ void init_LED(void)
 void vLED_TASK0(void* pvParameters)
 {
 	volatile avr32_gpio_port_t * led0 = &AVR32_GPIO.port[LED0_PORT];
-	portTickType xLastWakeTime;
-	portTickType StartTime, EndTime;
-	const portTickType xFrequency = taskTime;
+	portTickType StartTime, EndTime, xLastWakeTime, deadline, reset;
 	const portTickType tLimit = deadlineA;
 	const portTickType release = releaseA;
-	const portTickType reset = lastDeadline;
+	const portTickType resetA = lastDeadline;
 	xSemaphoreHandle xSem = *(xSemaphoreHandle*)pvParameters;
 
 
 	while(1)
 	{
-		StartTime = xTaskGetTickCount();
 		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, release);
+		vTaskDelayUntil(&xLastWakeTime, release); //Release delay
+		
+		StartTime = xTaskGetTickCount(); //Start time for task
+		deadline = StartTime+tLimit; //Get deadline for current cycle
+		reset = StartTime+resetA; //Get the reset for current cycle
+		
 		usart_write_line(configDBG_USART, "Start - Task A\n");
-		if(xSemaphoreTake(xSem, tLimit))
+		if(xSemaphoreTake(xSem, deadlineA))
 		{
 			usart_write_line(configDBG_USART , "Task A - Semaphore Take\n");
-			led0->ovrc = LED0_BIT_VALUE;
-			mdelay(taskTime);
-			led0->ovrs = LED0_BIT_VALUE;
-
 			
+			led0->ovrc = LED0_BIT_VALUE; //Turn on LED 0
+			mdelay(taskTime); //Active delay
+			led0->ovrs = LED0_BIT_VALUE; //Turn off LED 0
 		}
 			
-		EndTime = xTaskGetTickCount();
-		if(deadlineA < (EndTime-StartTime) )
+		EndTime = xTaskGetTickCount(); //See when task finishes
+		if(deadline < EndTime)
 			usart_write_line(configDBG_USART, "DEADLINE MISS - Task A\n");
 		else
 			usart_write_line(configDBG_USART, "Success - Task A\n");
 			
 		usart_write_line(configDBG_USART , "Task A - Semaphore Give\n");
 		xSemaphoreGive(xSem);
+		
+		EndTime = xTaskGetTickCount(); //Update EndTime for last delay
+		xLastWakeTime = xTaskGetTickCount();
+		vTaskDelayUntil(&xLastWakeTime, (resetA - (EndTime - StartTime))); //Delay until next cycle
 
 	}
 }
 void vLED_TASK1(void* pvParameters)
 {
 	volatile avr32_gpio_port_t * led1 = &AVR32_GPIO.port[LED1_PORT];
-	portTickType xLastWakeTime;
-	portTickType StartTime, EndTime;
-	const portTickType xFrequency = taskTime;
+	portTickType StartTime, EndTime, xLastWakeTime, deadline, reset;
 	const portTickType tLimit = deadlineB;
 	const portTickType release = releaseB;
-	const portTickType reset = lastDeadline;
+	const portTickType resetB = lastDeadline;
 	xSemaphoreHandle xSem = *(xSemaphoreHandle*)pvParameters;
-	int DeadlineMiss = FALSE;
 
 	while(1)
 	{
-		StartTime = xTaskGetTickCount();
 		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, release);
-		usart_write_line(configDBG_USART, "Start - Task B\n");		
-// 		if(xSemaphoreTake(xSem, tLimit))
-// 		{
-//			usart_write_line(configDBG_USART , "Task B - Semaphore Take\n");
-			led1->ovrc = LED1_BIT_VALUE;			
-			
-			mdelay(taskTime);
-			
-			led1->ovrs = LED1_BIT_VALUE;
-// 			usart_write_line(configDBG_USART , "Task B - Semaphore Give\n");
-// 			xSemaphoreGive(xSem);			
-// 		}
+		vTaskDelayUntil(&xLastWakeTime, release); //Release delay
+		
+		StartTime = xTaskGetTickCount(); //Start time for task
+		deadline = StartTime+tLimit; //Get deadline for current cycle
+		reset = StartTime+resetB; //Get the reset for current cycle
+		
 
-		EndTime = xTaskGetTickCount();
-		if(deadlineA < (EndTime-StartTime) )
+		usart_write_line(configDBG_USART, "Start - Task B\n");		
+
+		led1->ovrc = LED1_BIT_VALUE; //Turn on LED 1		
+		mdelay(taskTime); //Active delay
+		led1->ovrs = LED1_BIT_VALUE; //Turn off LED 1
+
+		EndTime = xTaskGetTickCount(); //See when task finishes
+		if(deadline < EndTime )
 			usart_write_line(configDBG_USART, "DEADLINE MISS - Task A\n");
 		else
 			usart_write_line(configDBG_USART, "Success - Task B\n");
 
+		EndTime = xTaskGetTickCount(); //Update EndTime for last delay
 		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, reset);
+		vTaskDelayUntil(&xLastWakeTime, (resetB - (EndTime - StartTime))); //Delay until next cycle
 	}
 }
 void vLED_TASK2(void* pvParameters)
 {
 	volatile avr32_gpio_port_t * led2 = &AVR32_GPIO.port[LED2_PORT];
-	portTickType xLastWakeTime;
-	portTickType StartTime, EndTime;
-	const portTickType xFrequency = taskTime;
+	portTickType StartTime, EndTime, xLastWakeTime, deadline, reset;
 	const portTickType tLimit = deadlineC;
 	const portTickType release = releaseC;
-	const portTickType reset = lastDeadline;	
+	const portTickType resetC = lastDeadline;	
 	xSemaphoreHandle xSem = *(xSemaphoreHandle*)pvParameters;
-	int DeadlineMiss = FALSE;
 	
 	while(1)
 	{
-		StartTime = xTaskGetTickCount();
 		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, release);	
+		vTaskDelayUntil(&xLastWakeTime, release); //Release delay	
+		
+		StartTime = xTaskGetTickCount(); //Start time for task
+		deadline = StartTime+tLimit; //Get deadline for current cycle
+		reset = StartTime+resetC; //Get the reset for current cycle
+	
 		usart_write_line(configDBG_USART, "Start - Task C\n");	
-		if(xSemaphoreTake(xSem, tLimit))
+		
+		if(xSemaphoreTake(xSem, deadlineC))
 		{
 			usart_write_line(configDBG_USART , "Task C - Semaphore Take\n");
-			led2->ovrc = LED2_BIT_VALUE;
-			mdelay(taskTime);
-			led2->ovrs = LED2_BIT_VALUE;
+			
+			led2->ovrc = LED2_BIT_VALUE; //Turn on LED 2
+			mdelay(taskTime); //Active delay
+			led2->ovrs = LED2_BIT_VALUE; //Turn off LED 2
 		}
 		
-		EndTime = xTaskGetTickCount();
-		if(deadlineC < (EndTime-StartTime) )
-			usart_write_line(configDBG_USART, "DEADLINE MISS - Task C\n");	
+		EndTime = xTaskGetTickCount(); //See when task finishes
+		
+		if(deadline < EndTime )
+			usart_write_line(configDBG_USART, "DEADLINE MISS - Task C\n");
 		else
 			usart_write_line(configDBG_USART, "Success - Task C\n");	
 		
 		usart_write_line(configDBG_USART , "Task C - Semaphore Give\n");	
 		xSemaphoreGive(xSem);
+		
+		EndTime = xTaskGetTickCount(); //Update EndTime for last delay
+		xLastWakeTime = xTaskGetTickCount();
+		vTaskDelayUntil(&xLastWakeTime, (resetC - (EndTime - StartTime))); //Delay until next cycle
 	}
 }
