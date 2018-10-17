@@ -38,6 +38,5 @@
 void USART_init(void);
 void vProducerTask(void* pvParameters);
 void vConsumerTask(void* pvParameters);
-void vSemaphoreTask(void* pvParameters);
 
 #endif /* FUNCTIONS_H_ */
