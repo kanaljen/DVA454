@@ -4,8 +4,12 @@ int main(void)
 {	
 	xTaskHandle *ProducerTaskHandle = malloc(sizeof(xTaskHandle*));
 	xTaskHandle *ConsumerTaskHandle = malloc(sizeof(xTaskHandle*));
-	xSemaphoreHandle *xSem = malloc(sizeof(xSemaphoreHandle*));
 	USART_init();
+	
+	//Initiate display
+	display_init();
+	dip204_set_cursor_position(1, 1);
+	dip204_printf_string("HELLO WORLD!");
 	
 	xTaskCreate(vSemaphoreTask, "xsemTask0", 256, NULL, tskIDLE_PRIORITY+1, NULL);
 	xTaskCreate(vProducerTask, "xTask0", 256, &ConsumerTaskHandle, tskIDLE_PRIORITY, &ProducerTaskHandle);

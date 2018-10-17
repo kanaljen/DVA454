@@ -53,51 +53,51 @@ void vLED_TASK0(void* pvParameters)
 {
 	volatile avr32_gpio_port_t * led0 = &AVR32_GPIO.port[LED0_PORT];
 	portTickType xLastWakeTime;
-	const portTickType xFrequency = 1000;
+	const portTickType xFrequency = 1000; //1 sec
 
 	while(1)
 	{	
-		taskENTER_CRITICAL();
+		taskENTER_CRITICAL(); //Makes sure the message isn't being over written
 		usart_write_line(configDBG_USART , "LED 0 toggled\n");
 		taskEXIT_CRITICAL();
 		
-		led0->ovrt = LED0_BIT_VALUE;
+		led0->ovrt = LED0_BIT_VALUE; //Toggles LED0
 		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
+		vTaskDelayUntil(&xLastWakeTime, xFrequency); //Delays 1 sec
 	}
 }
 void vLED_TASK1(void* pvParameters)
 {
 	volatile avr32_gpio_port_t * led1 = &AVR32_GPIO.port[LED1_PORT];
 	portTickType xLastWakeTime;
-	const portTickType xFrequency = 2000;
+	const portTickType xFrequency = 2000; //2 sec
 
 	while(1)
 	{
-		taskENTER_CRITICAL();
+		taskENTER_CRITICAL(); //Makes sure the message isn't being over written
 		usart_write_line(configDBG_USART , "LED 1 toggled\n");
 		taskEXIT_CRITICAL();
 		
-		led1->ovrt = LED1_BIT_VALUE;
+		led1->ovrt = LED1_BIT_VALUE; //Toggles LED1
 		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
+		vTaskDelayUntil(&xLastWakeTime, xFrequency); //Delays 2 sec
 	}
 }
 void vLED_TASK2(void* pvParameters)
 {
 	volatile avr32_gpio_port_t * led2 = &AVR32_GPIO.port[LED2_PORT];
 	portTickType xLastWakeTime;
-	const portTickType xFrequency = 3000;
+	const portTickType xFrequency = 3000; //3 sec
 
 	while(1)
 	{
-		taskENTER_CRITICAL();
+		taskENTER_CRITICAL(); //Makes sure the message isn't being over written
 		usart_write_line(configDBG_USART , "LED 2 toggled\n");
 		taskEXIT_CRITICAL();
 		
-		led2->ovrt = LED2_BIT_VALUE;
+		led2->ovrt = LED2_BIT_VALUE; //Toggles LED2
 		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
+		vTaskDelayUntil(&xLastWakeTime, xFrequency); //Delays 3 sec
 	}
 }
 void vbutton_TASK0(void* pvParameters)
@@ -105,34 +105,34 @@ void vbutton_TASK0(void* pvParameters)
 	volatile int button_state0; //Initialize button state 0
 	volatile avr32_gpio_port_t * led0 = &AVR32_GPIO.port[LED0_PORT];
 	portTickType xLastWakeTime;
-	const portTickType xFrequency = 10000;
-	xTaskHandle task  = *(xTaskHandle *)pvParameters;
+	const portTickType xFrequency = 10000; //10 sec
+	xTaskHandle task  = *(xTaskHandle *)pvParameters; //Blink LED handle
 	
 	while(1){
 		
-		while(button_state0)
-			button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0;
+		while(button_state0) //While button isn't pushed
+			button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read button
 		
-		if(!button_state0){
-			taskENTER_CRITICAL();
+		if(!button_state0){ //If button is pushed
+			taskENTER_CRITICAL(); //Makes sure the message isn't being over written
 			usart_write_line(configDBG_USART , "Button 0 pressed\n");
 			taskEXIT_CRITICAL();
 			 
-			vTaskSuspend(task);
+			vTaskSuspend(task); //Suspend the task with the same LED with its handle
 			
-			led0->ovrc = LED0_BIT_VALUE;
+			led0->ovrc = LED0_BIT_VALUE; //Turn on LED
 			
-			taskENTER_CRITICAL();
+			taskENTER_CRITICAL(); //Makes sure the message isn't being over written
 			usart_write_line(configDBG_USART , "LED 0 toggled for 10 seconds\n");
 			taskEXIT_CRITICAL();
 			
 			xLastWakeTime = xTaskGetTickCount(); 
-			vTaskDelayUntil(&xLastWakeTime, xFrequency);
+			vTaskDelayUntil(&xLastWakeTime, xFrequency); //Delay 10 sec
 		
-			vTaskResume(task);
+			vTaskResume(task); //Resumes the blinking task
 			
-			while(!button_state0)
-				button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read Button 1
+			while(!button_state0) //If the button is still pressed after 10 sec, it will not keep running the task
+				button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read Button 0
 		}
 	}
 }
@@ -141,35 +141,35 @@ void vbutton_TASK1(void* pvParameters)
 	volatile int button_state1; //Initialize button state 1
 	volatile avr32_gpio_port_t * led1 = &AVR32_GPIO.port[LED1_PORT];
 	portTickType xLastWakeTime;
-	const portTickType xFrequency = 10000;
-	xTaskHandle task  = *(xTaskHandle *)pvParameters;
+	const portTickType xFrequency = 10000; //10 sec
+	xTaskHandle task  = *(xTaskHandle *)pvParameters; //Blink LED handle
 	
 	
 	while(1){
 		
-		while(button_state1)
-			button_state1 = AVR32_GPIO.port[BUTTON_PORT1].pvr & BUTTON_PIN1;
+		while(button_state1) //While button isn't pushed
+			button_state1 = AVR32_GPIO.port[BUTTON_PORT1].pvr & BUTTON_PIN1; //Read button
 		
-		if(!button_state1){
+		if(!button_state1){ //If button is pushed
 			
-			taskENTER_CRITICAL();
+			taskENTER_CRITICAL(); //Makes sure the message isn't being over written
 			usart_write_line(configDBG_USART , "Button 1 pressed\n"); 
 			taskEXIT_CRITICAL();
 			
-			vTaskSuspend(task);
+			vTaskSuspend(task); //Suspend the task with the same LED with its handle
 			
-			led1->ovrc = LED1_BIT_VALUE;
+			led1->ovrc = LED1_BIT_VALUE; //Turn on LED
 			
-			taskENTER_CRITICAL();
+			taskENTER_CRITICAL(); //Makes sure the message isn't being over written
 			usart_write_line(configDBG_USART , "LED 1 toggled for 10 seconds\n"); 
 			taskEXIT_CRITICAL();
 			
 			xLastWakeTime = xTaskGetTickCount();
-			vTaskDelayUntil(&xLastWakeTime, xFrequency);
+			vTaskDelayUntil(&xLastWakeTime, xFrequency); //Delay 10 sec
 			
-			vTaskResume(task);
+			vTaskResume(task); //Resumes the blinking task
 			
-			while(!button_state1)
+			while(!button_state1) //If the button is still pressed after 10 sec, it will not keep running the task
 				button_state1 = AVR32_GPIO.port[BUTTON_PORT1].pvr & BUTTON_PIN1; //Read Button 1
 		}
 	}
@@ -179,33 +179,34 @@ void vbutton_TASK2(void* pvParameters)
 	volatile int button_state2; //Initialize button state 2
 	volatile avr32_gpio_port_t * led2 = &AVR32_GPIO.port[LED2_PORT];
 	portTickType xLastWakeTime;
-	const portTickType xFrequency = 10000;
-	xTaskHandle task = *(xTaskHandle *)pvParameters;
+	const portTickType xFrequency = 10000; //10 sec
+	xTaskHandle task = *(xTaskHandle *)pvParameters; //Blink LED handle
 	
 	
 	while(1){
 		
-		while(button_state2)
+		while(button_state2) //While button isn't pushed
 			button_state2 = AVR32_GPIO.port[BUTTON_PORT2].pvr & BUTTON_PIN2; //Read Button 2
 		
-		if(!button_state2){
+		if(!button_state2){ //If button is pushed
 			
-			taskENTER_CRITICAL();
+			taskENTER_CRITICAL(); //Makes sure the message isn't being over written
 			usart_write_line(configDBG_USART , "Button 2 pressed\n");
 			taskEXIT_CRITICAL();
-			vTaskSuspend(task);
+			vTaskSuspend(task); //Suspend the task with the same LED with its handle
 			
-			led2->ovrc = LED2_BIT_VALUE;
-			taskENTER_CRITICAL();
+			led2->ovrc = LED2_BIT_VALUE; //Turn on LED
+			
+			taskENTER_CRITICAL(); //Makes sure the message isn't being over written
 			usart_write_line(configDBG_USART , "LED 2 toggled for 10 seconds\n"); 
 			taskEXIT_CRITICAL();
 			
 			xLastWakeTime = xTaskGetTickCount();
-			vTaskDelayUntil(&xLastWakeTime, xFrequency);
+			vTaskDelayUntil(&xLastWakeTime, xFrequency); //Delay 10 sec
 			
-			vTaskResume(task);
+			vTaskResume(task); //Resumes the blinking task
 			
-			while(!button_state2)
+			while(!button_state2) //If the button is still pressed after 10 sec, it will not keep running the task
 				button_state2 = AVR32_GPIO.port[BUTTON_PORT2].pvr & BUTTON_PIN2; //Read Button 2
 		}
 	}

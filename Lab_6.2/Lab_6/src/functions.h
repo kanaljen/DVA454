@@ -9,6 +9,8 @@
 #include "gpio.h"
 #include "semphr.h"
 #include "stdio.h"
+#include "display_init.h"
+#include "adc.h"
 
 #ifndef FUNCTIONS_H_
 #define FUNCTIONS_H_
@@ -38,5 +40,6 @@
 void USART_init(void);
 void vProducerTask(void* pvParameters);
 void vConsumerTask(void* pvParameters);
+void vSemaphoreTask(void* pvParameters);
 
 #endif /* FUNCTIONS_H_ */

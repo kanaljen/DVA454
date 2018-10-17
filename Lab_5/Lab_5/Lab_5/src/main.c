@@ -3,7 +3,7 @@
 int main(void)
 {	
 	volatile avr32_usart_t *usart = &AVR32_USART1;
-	xTaskHandle *blinkHandle = malloc(sizeof(xTaskHandle *)*3);
+	xTaskHandle *blinkHandle = malloc(sizeof(xTaskHandle *)*3); //Handles for the blinking task
 	
 	USART_init();
 	init_LED();

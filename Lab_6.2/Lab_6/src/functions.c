@@ -2,7 +2,7 @@
 
 int buffer[buffer_size];
 int itemCount = 0;
-xSemaphoreHandle xSem;
+xSemaphoreHandle xSem = NULL;
 
 void USART_init(void)
 {
@@ -35,7 +35,8 @@ void USART_init(void)
 }
 void vSemaphoreTask( void * pvParameters )
 {
-	vSemaphoreCreateBinary(xSem);	
+	vSemaphoreCreateBinary(xSem);
+	vTaskSuspend(NULL);
 }
 
 void vProducerTask(void* pvParameters)
@@ -43,10 +44,7 @@ void vProducerTask(void* pvParameters)
 	xTaskHandle ConsumerTaskHandle = *(xTaskHandle *)pvParameters;
 	int item;
 	char char_buffer[16];
-	
-	//xSemaphoreTake(xSem, tLimit)
-	//xSemaphoreGive(xSem, tLimit)
-	
+		
 	while(1)
 	{	
 		if(itemCount == buffer_size)
@@ -55,17 +53,31 @@ void vProducerTask(void* pvParameters)
 			usart_write_line(configDBG_USART, "Producer Sleeping\n");
 			taskEXIT_CRITICAL();
 			vTaskSuspend(NULL);
+			taskENTER_CRITICAL();
+			usart_write_line(configDBG_USART, "Producer Awakened\n");
+			taskEXIT_CRITICAL();
 		}  
+		
+		if(xSem != NULL)
+		{
+			while(xSemaphoreTake(xSem, (portTickType) 0) != pdPASS);
+			taskENTER_CRITICAL();
+			usart_write_line(configDBG_USART, "Producer took Semaphore\n");
+			taskEXIT_CRITICAL();
+		}
 		
 		buffer[itemCount] = itemCount + 1;
 		item = buffer[itemCount];
 		itemCount++;
 		
+		taskENTER_CRITICAL();
+		usart_write_line(configDBG_USART, "Item added to buffer\n");
+		usart_write_line(configDBG_USART, "Producer gave Semaphore\n");
+		taskEXIT_CRITICAL();
+		xSemaphoreGive(xSem);
+		
 		if(itemCount == 1)
 		{
-			taskENTER_CRITICAL();
-			usart_write_line(configDBG_USART, "Consumer Awakened\n");
-			taskEXIT_CRITICAL();
 			vTaskResume(ConsumerTaskHandle);
 		}
 		
@@ -73,7 +85,6 @@ void vProducerTask(void* pvParameters)
 		taskENTER_CRITICAL();
 		usart_write_line(configDBG_USART , char_buffer);
 		taskEXIT_CRITICAL();
-		
 	}
 }
 void vConsumerTask(void* pvParameters)
@@ -82,10 +93,7 @@ void vConsumerTask(void* pvParameters)
 	xTaskHandle ProducerTaskHandle = *(xTaskHandle *)pvParameters;
 	int item;
 	char char_buffer[16];
-	
-	//xSemaphoreTake(xSem, tLimit)
-	//xSemaphoreGive(xSem, tLimit)
-	
+		
 	while(1)
 	{
 		if(itemCount == 0)
@@ -94,24 +102,37 @@ void vConsumerTask(void* pvParameters)
 			usart_write_line(configDBG_USART, "Consumer Sleeping\n");
 			taskEXIT_CRITICAL();
 			vTaskSuspend(NULL);
+			taskENTER_CRITICAL();
+			usart_write_line(configDBG_USART, "Consumer Awakened\n");
+			taskEXIT_CRITICAL();
 		}
 		
-		item = buffer[itemCount];
-		buffer[itemCount] = -1;
+		if(xSem != NULL)
+		{
+			while(xSemaphoreTake(xSem, (portTickType) 0) != pdPASS);
+			taskENTER_CRITICAL();
+			usart_write_line(configDBG_USART, "Consumer took Semaphore\n");
+			taskEXIT_CRITICAL();
+		}
+		
+		item = buffer[itemCount-1];
 		itemCount--;
+		
+		taskENTER_CRITICAL();
+		usart_write_line(configDBG_USART, "Item removed from buffer\n");
+		usart_write_line(configDBG_USART, "Consumer gave Semaphore\n");
+		taskEXIT_CRITICAL();
+		
+		xSemaphoreGive(xSem);
 		
 		if(itemCount == buffer_size - 1)
 		{
-			taskENTER_CRITICAL();
-			usart_write_line(configDBG_USART, "Producer Awakened\n");
-			taskEXIT_CRITICAL();
 			vTaskResume(ProducerTaskHandle);
 		}
 		
 		sprintf(char_buffer, "Item %d consumed\n", item);
 		taskENTER_CRITICAL();
 		usart_write_line(configDBG_USART , char_buffer);
-		taskEXIT_CRITICAL();
-		
+		taskEXIT_CRITICAL();	
 	}
 }
