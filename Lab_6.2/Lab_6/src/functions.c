@@ -42,23 +42,22 @@ void vUSARTTask(void* pvParameters) {
 }
 
 void vLCDTask(void* pvParameters) {
-	char* buffer;
+	//char buffer[buffer_size];
+	char single_char;
+	int c; 
 	int k = 1;
 	
 	while(1) {
 		
-		//usart_read_char(configDBG_USART, *buffer++);
-
-		//dip204_set_cursor_position(k, 1);
-		//dip204_printf_string("%c", buffer);
+		while ((usart_read_char(configDBG_USART, &c)) == USART_RX_EMPTY);
 		
-		k++;
+		taskENTER_CRITICAL();
+		dip204_set_cursor_position(k, 1);
+		dip204_printf_string(c);
+		//k++;
+		taskEXIT_CRITICAL();
 		
-		if(!(k % 20))
-		{
-			//dip204_clear_display();
-			k = 0;
-		}
+		
 	}
 }
 void vButtonTASK(void* pvParameters)
@@ -67,6 +66,7 @@ void vButtonTASK(void* pvParameters)
 	xTaskHandle task  = *(xTaskHandle *)pvParameters; //Blink LED handle
 	portTickType xLastWakeTime;
 	const portTickType delay = 10000; //10 sec
+	char *test = "HOMO";
 	
 	
 	while(1){
@@ -81,8 +81,11 @@ void vButtonTASK(void* pvParameters)
 			usart_write_line(configDBG_USART , "Button 0 pressed\n");
 			taskEXIT_CRITICAL();
 			
+			taskENTER_CRITICAL();
 			dip204_set_cursor_position(1, 2);
-			dip204_printf_string("#Char:");
+			//dip204_printf_string("#Char:");
+			dip204_printf_string(test);
+			taskEXIT_CRITICAL();
 			
 			xLastWakeTime = xTaskGetTickCount();
 			vTaskDelayUntil(&xLastWakeTime, delay); //Delays 10 sec
