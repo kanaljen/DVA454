@@ -8,7 +8,7 @@ int main(void)
 	//Initiate display
 	display_init();
 
-	xTaskCreate(vUSARTTask, "xUSARTTask", 256, &LCDTaskHandle, tskIDLE_PRIORITY+2, NULL);
+	//xTaskCreate(vUSARTTask, "xUSARTTask", 256, &LCDTaskHandle, tskIDLE_PRIORITY+2, NULL);
 	xTaskCreate(vLCDTask, "xLCDTask", 256, NULL, tskIDLE_PRIORITY+2, &LCDTaskHandle);
 	xTaskCreate(vButtonTASK, "xButtonTask", 256, &LCDTaskHandle, tskIDLE_PRIORITY+2, NULL);
 

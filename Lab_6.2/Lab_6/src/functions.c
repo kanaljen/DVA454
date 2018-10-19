@@ -1,7 +1,4 @@
 #include "functions.h"
-
-int buffer[buffer_size];
-int itemCount = 0;
 xSemaphoreHandle xSem = NULL;
 
 void USART_init(void)
@@ -36,7 +33,7 @@ void USART_init(void)
 
 void vUSARTTask(void* pvParameters) {
 	
-		xTaskHandle task  = *(xTaskHandle *)pvParameters; //Blink LED handle
+	xTaskHandle task  = *(xTaskHandle *)pvParameters; //Blink LED handle
 	
 	while(1) {
 		//usart_read_char(configDBG_USART);
@@ -46,22 +43,21 @@ void vUSARTTask(void* pvParameters) {
 
 void vLCDTask(void* pvParameters) {
 	char* buffer;
-	int k = 0;
-	while(1) { 
+	int k = 1;
+	
+	while(1) {
 		
-		  usart_read_char(configDBG_USART, *buffer++);
+		//usart_read_char(configDBG_USART, *buffer++);
 
-			
-
-			dip204_set_cursor_position(1, 1);
-			dip204_printf_string("%c", buffer);	
-			
-		k++;	
-			
+		//dip204_set_cursor_position(k, 1);
+		//dip204_printf_string("%c", buffer);
+		
+		k++;
+		
 		if(!(k % 20))
 		{
-		dip204_clear_display();
-		k = 0;
+			//dip204_clear_display();
+			k = 0;
 		}
 	}
 }
@@ -76,7 +72,9 @@ void vButtonTASK(void* pvParameters)
 	while(1){
 		
 		while(button_state0) //While button isn't pushed
-		button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read button
+		{
+			button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read button
+		}
 		
 		if(!button_state0){ //If button is pushed
 			taskENTER_CRITICAL(); //Makes sure the message isn't being over written
@@ -91,9 +89,11 @@ void vButtonTASK(void* pvParameters)
 			
 			dip204_clear_display();
 
-					
+			
 			while(!button_state0) //If the button is still pressed, it will not keep running the task
-			button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read Button 0
+			{
+				button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read Button 0
+			}
 		}
 	}
 }
