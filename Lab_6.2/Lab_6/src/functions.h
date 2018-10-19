@@ -11,6 +11,7 @@
 #include "stdio.h"
 #include "display_init.h"
 #include "adc.h"
+#include <stdio.h>
 
 #ifndef FUNCTIONS_H_
 #define FUNCTIONS_H_
@@ -18,6 +19,10 @@
 #define TRUE 1
 #define FALSE 0
 #define GPIO_MAX_PIN_NUMBER 32
+
+//Define button 0
+#define BUTTON_PORT0 (GPIO_PUSH_BUTTON_0 >> 5)
+#define BUTTON_PIN0 (1 << (GPIO_PUSH_BUTTON_0 & 0x1f))
 
 #define configDBG 1
 #define configDBG_USART (&AVR32_USART1)
@@ -38,8 +43,9 @@
 #define buffer_size 10
 
 void USART_init(void);
-void vProducerTask(void* pvParameters);
-void vConsumerTask(void* pvParameters);
 void vSemaphoreTask(void* pvParameters);
+void vLCDTask(void* pvParameters);
+void vButtonTASK(void* pvParameters);
+void vUSARTTask(void* pvParameters);
 
 #endif /* FUNCTIONS_H_ */

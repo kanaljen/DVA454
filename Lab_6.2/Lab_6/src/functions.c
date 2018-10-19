@@ -33,106 +33,44 @@ void USART_init(void)
 	usart_write_line(configDBG_USART , "USART Initialized\n");
 	
 }
-void vSemaphoreTask( void * pvParameters )
-{
-	vSemaphoreCreateBinary(xSem);
-	vTaskSuspend(NULL);
-}
 
-void vProducerTask(void* pvParameters)
-{
-	xTaskHandle ConsumerTaskHandle = *(xTaskHandle *)pvParameters;
-	int item;
-	char char_buffer[16];
+void vUSARTTask(void* pvParameters) {
+	
+		xTaskHandle task  = *(xTaskHandle *)pvParameters; //Blink LED handle
+	
+	while(1) {
+		usart_read_char(configDBG_USART,)
 		
-	while(1)
-	{	
-		if(itemCount == buffer_size)
-		{
-			taskENTER_CRITICAL();
-			usart_write_line(configDBG_USART, "Producer Sleeping\n");
-			taskEXIT_CRITICAL();
-			vTaskSuspend(NULL);
-			taskENTER_CRITICAL();
-			usart_write_line(configDBG_USART, "Producer Awakened\n");
-			taskEXIT_CRITICAL();
-		}  
-		
-		if(xSem != NULL)
-		{
-			while(xSemaphoreTake(xSem, (portTickType) 0) != pdPASS);
-			taskENTER_CRITICAL();
-			usart_write_line(configDBG_USART, "Producer took Semaphore\n");
-			taskEXIT_CRITICAL();
-		}
-		
-		buffer[itemCount] = itemCount + 1;
-		item = buffer[itemCount];
-		itemCount++;
-		
-		taskENTER_CRITICAL();
-		usart_write_line(configDBG_USART, "Item added to buffer\n");
-		usart_write_line(configDBG_USART, "Producer gave Semaphore\n");
-		taskEXIT_CRITICAL();
-		xSemaphoreGive(xSem);
-		
-		if(itemCount == 1)
-		{
-			vTaskResume(ConsumerTaskHandle);
-		}
-		
-		sprintf(char_buffer, "Item %d produced\n", item);
-		taskENTER_CRITICAL();
-		usart_write_line(configDBG_USART , char_buffer);
-		taskEXIT_CRITICAL();
 	}
 }
-void vConsumerTask(void* pvParameters)
+
+void vLCDTask(void* pvParameters) {
+	while(1) { 
+			vTaskSuspend(NULL); 
+			dip204_set_cursor_position(1, 1);
+			dip204_printf_string("HELLO WORLD!");
+			
+	}
+}
+void vButtonTASK(void* pvParameters)
 {
+	volatile int button_state0; //Initialize button state 0
+	xTaskHandle task  = *(xTaskHandle *)pvParameters; //Blink LED handle
 	
-	xTaskHandle ProducerTaskHandle = *(xTaskHandle *)pvParameters;
-	int item;
-	char char_buffer[16];
+	while(1){
 		
-	while(1)
-	{
-		if(itemCount == 0)
-		{
-			taskENTER_CRITICAL();
-			usart_write_line(configDBG_USART, "Consumer Sleeping\n");
+		while(button_state0) //While button isn't pushed
+		button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read button
+		
+		if(!button_state0){ //If button is pushed
+			taskENTER_CRITICAL(); //Makes sure the message isn't being over written
+			usart_write_line(configDBG_USART , "Button 0 pressed\n");
 			taskEXIT_CRITICAL();
-			vTaskSuspend(NULL);
-			taskENTER_CRITICAL();
-			usart_write_line(configDBG_USART, "Consumer Awakened\n");
-			taskEXIT_CRITICAL();
+			
+			vTaskResume(task); //Suspend the task with the same LED with its handle
+			
+			while(!button_state0) //If the button is still pressed, it will not keep running the task
+			button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read Button 0
 		}
-		
-		if(xSem != NULL)
-		{
-			while(xSemaphoreTake(xSem, (portTickType) 0) != pdPASS);
-			taskENTER_CRITICAL();
-			usart_write_line(configDBG_USART, "Consumer took Semaphore\n");
-			taskEXIT_CRITICAL();
-		}
-		
-		item = buffer[itemCount-1];
-		itemCount--;
-		
-		taskENTER_CRITICAL();
-		usart_write_line(configDBG_USART, "Item removed from buffer\n");
-		usart_write_line(configDBG_USART, "Consumer gave Semaphore\n");
-		taskEXIT_CRITICAL();
-		
-		xSemaphoreGive(xSem);
-		
-		if(itemCount == buffer_size - 1)
-		{
-			vTaskResume(ProducerTaskHandle);
-		}
-		
-		sprintf(char_buffer, "Item %d consumed\n", item);
-		taskENTER_CRITICAL();
-		usart_write_line(configDBG_USART , char_buffer);
-		taskEXIT_CRITICAL();	
 	}
 }
