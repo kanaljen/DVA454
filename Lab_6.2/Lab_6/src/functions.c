@@ -39,23 +39,39 @@ void vUSARTTask(void* pvParameters) {
 		xTaskHandle task  = *(xTaskHandle *)pvParameters; //Blink LED handle
 	
 	while(1) {
-		usart_read_char(configDBG_USART,)
+		//usart_read_char(configDBG_USART);
 		
 	}
 }
 
 void vLCDTask(void* pvParameters) {
+	char* buffer;
+	int k = 0;
 	while(1) { 
-			vTaskSuspend(NULL); 
-			dip204_set_cursor_position(1, 1);
-			dip204_printf_string("HELLO WORLD!");
+		
+		  usart_read_char(configDBG_USART, *buffer++);
+
 			
+
+			dip204_set_cursor_position(1, 1);
+			dip204_printf_string("%c", buffer);	
+			
+		k++;	
+			
+		if(!(k % 20))
+		{
+		dip204_clear_display();
+		k = 0;
+		}
 	}
 }
 void vButtonTASK(void* pvParameters)
 {
 	volatile int button_state0; //Initialize button state 0
 	xTaskHandle task  = *(xTaskHandle *)pvParameters; //Blink LED handle
+	portTickType xLastWakeTime;
+	const portTickType delay = 10000; //10 sec
+	
 	
 	while(1){
 		
@@ -67,8 +83,15 @@ void vButtonTASK(void* pvParameters)
 			usart_write_line(configDBG_USART , "Button 0 pressed\n");
 			taskEXIT_CRITICAL();
 			
-			vTaskResume(task); //Suspend the task with the same LED with its handle
+			dip204_set_cursor_position(1, 2);
+			dip204_printf_string("#Char:");
 			
+			xLastWakeTime = xTaskGetTickCount();
+			vTaskDelayUntil(&xLastWakeTime, delay); //Delays 10 sec
+			
+			dip204_clear_display();
+
+					
 			while(!button_state0) //If the button is still pressed, it will not keep running the task
 			button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read Button 0
 		}
