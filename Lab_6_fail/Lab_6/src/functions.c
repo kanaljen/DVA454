@@ -38,19 +38,21 @@ void vProducerTask(void* pvParameters)
 	xTaskHandle ConsumerTaskHandle = *(xTaskHandle *)pvParameters;
 	int item;
 	char char_buffer[16];
-		
+	
 	while(1)
-	{	
+	{
 		if(itemCount == buffer_size)
 		{
 			taskENTER_CRITICAL();
 			usart_write_line(configDBG_USART, "Producer Sleeping\n");
 			taskEXIT_CRITICAL();
+			
 			vTaskSuspend(NULL);
+			
 			taskENTER_CRITICAL();
 			usart_write_line(configDBG_USART, "Producer Awakened\n");
 			taskEXIT_CRITICAL();
-		}  
+		}
 		
 		buffer[itemCount] = itemCount + 1;
 		item = buffer[itemCount];
@@ -61,6 +63,7 @@ void vProducerTask(void* pvParameters)
 			vTaskResume(ConsumerTaskHandle);
 		}
 		
+		/* CAUSION!! DO NOT ADD A " . " IN THE STRING BELOW */
 		sprintf(char_buffer, "Item %d produced\n", item);
 		taskENTER_CRITICAL();
 		usart_write_line(configDBG_USART , char_buffer);
@@ -73,9 +76,10 @@ void vConsumerTask(void* pvParameters)
 	xTaskHandle ProducerTaskHandle = *(xTaskHandle *)pvParameters;
 	int item;
 	char char_buffer[16];
-		
+	
 	while(1)
 	{
+		
 		if(itemCount == 0)
 		{
 			taskENTER_CRITICAL();
@@ -89,8 +93,8 @@ void vConsumerTask(void* pvParameters)
 			taskEXIT_CRITICAL();
 		}
 		
-		item = buffer[itemCount];
-		buffer[itemCount] = -1;
+		item = buffer[itemCount-1];
+		buffer[itemCount-1] = 0;
 		itemCount--;
 		
 		if(itemCount == buffer_size - 1)
@@ -98,9 +102,10 @@ void vConsumerTask(void* pvParameters)
 			vTaskResume(ProducerTaskHandle);
 		}
 		
-		sprintf(char_buffer, "Item %d consumed\n", item);
+		/* CAUSION!! DO NOT REMOVE THE " . " IN THE STRING BELOW */
+		sprintf(char_buffer, "Item %d consumed.\n", item);
 		taskENTER_CRITICAL();
 		usart_write_line(configDBG_USART , char_buffer);
-		taskEXIT_CRITICAL();	
+		taskEXIT_CRITICAL();
 	}
 }

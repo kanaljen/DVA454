@@ -2,6 +2,8 @@
 
 int main(void)
 {	
+	//The one with semaphores
+	
 	volatile avr32_usart_t *usart = &AVR32_USART1;
 	xSemaphoreHandle *xSem = malloc(sizeof(xSemaphoreHandle*)); //Semaphore handle
 	
