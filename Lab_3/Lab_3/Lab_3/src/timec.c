@@ -11,10 +11,10 @@ __attribute__((__interrupt__))static void tc_irq_handler(void)
 	tc_read_sr(&AVR32_TC, TC_CHANNEL);
 }
 
-void TC_init(volatile avr32_tc_t * tc){
+void TC_init(volatile avr32_tc_t * tc, int time_d){
 	
 	// Set RC value
-	tc_write_rc(tc, TC_CHANNEL, (CLK_FRQ/10)); // RC_VALUE/10 = Each tenths sec
+	tc_write_rc(tc, TC_CHANNEL, (115200/(8/time_d)));
 	
 	// Set waveform option
 	tc_init_waveform(tc, &waveform_opt);

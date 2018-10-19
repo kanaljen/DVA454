@@ -17,7 +17,7 @@ extern int interupts;			// Global variable
 // Define the options for waveform generation
 static tc_waveform_opt_t waveform_opt =
 {
-	. channel = 0 , // Channel selection .
+	. channel = TC_CHANNEL , // Channel selection .
 	. wavsel = TC_WAVEFORM_SEL_UP_MODE_RC_TRIGGER ,// Waveform selection: Up mode with automatic trigger (reset) on RC compare .
 	. enetrg = FALSE , // External event trigger enable.
 	. eevt = 0, // External event selection.
@@ -29,13 +29,6 @@ static tc_waveform_opt_t waveform_opt =
 	. tcclks = TC_CLOCK_SOURCE_TC3 // Internal clock source 3, connected to fPBA / 8.
 };
 
-struct time_struct
-{
-	int hour = 0;
-	int minute = 0;
-	int second = 0;
-};
-
 // Define which timer signals that will cause interrupts
 static const tc_interrupt_t tc_interupt_opt =
 {
@@ -43,7 +36,7 @@ static const tc_interrupt_t tc_interupt_opt =
 };
 
 // Define functions
-void TC_init(volatile avr32_tc_t * tc);
-__attribute__((__interrupt__))static void tc_irq_handler(void);
+__attribute__((__interrupt__))static void tc_irq_handler(void); // Interrupt-handler, add 1 to int interupts each interrupt
+void TC_init(volatile avr32_tc_t * tc, int time_d); // Initiate TC0 with RC set to 115200 Hz/8/time_d
 
 #endif /* FUNCTIONS_H_ */
