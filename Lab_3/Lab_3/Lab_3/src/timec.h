@@ -6,6 +6,7 @@
 #include "tc.h"
 #include "intc.h"
 #include "gpio.h"
+#include "usart.h"
 #include <stdio.h>
 
 #define TRUE 1
@@ -34,9 +35,5 @@ static const tc_interrupt_t TC_INTERRUPT_OPT =
 };
 
 void TC_init(volatile avr32_tc_t * tc, int tc_channel, __int_handler handler);
-void USART_init(volatile avr32_usart_t * usart);
-char USART_pollChar();
-void USART_putStr(char *c);
-void USART_reset(volatile avr32_usart_t * usart);
 
 #endif /* FUNCTIONS_H_ */
