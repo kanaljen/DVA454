@@ -1,16 +1,18 @@
 #ifndef TIMEC_H_
 #define TIMEC_H_
 
-#include "compiler.h"
-#include "board.h"
+#include "evk1100.h"
 #include "tc.h"
 #include "intc.h"
-#include "gpio.h"
+#include "interrupt.h"
 #include "usart.h"
-#include <stdio.h>
 
 #define TRUE 1
 #define FALSE 0
+#define TC_CHANNEL 0
+#define CLK_FRQ 14400 // fPBA / 8 (TC_CLOCK_SOURCE_TC3)
+
+extern int interupts;			// Global variable
 
 // Define the options for waveform generation
 static tc_waveform_opt_t waveform_opt =
@@ -27,13 +29,21 @@ static tc_waveform_opt_t waveform_opt =
 	. tcclks = TC_CLOCK_SOURCE_TC3 // Internal clock source 3, connected to fPBA / 8.
 };
 
-// Define which timer signals that will cause interrupts
-static const tc_interrupt_t TC_INTERRUPT_OPT =
+struct time_struct
 {
-	// we interrupt on RC compare match with CV
-	. cpcs = 1, // RC compare status
+	int hour = 0;
+	int minute = 0;
+	int second = 0;
 };
 
-void TC_init(volatile avr32_tc_t * tc, int tc_channel, __int_handler handler);
+// Define which timer signals that will cause interrupts
+static const tc_interrupt_t tc_interupt_opt =
+{
+	. cpcs = 1, // Only interrupt on RC
+};
+
+// Define functions
+void TC_init(volatile avr32_tc_t * tc);
+__attribute__((__interrupt__))static void tc_irq_handler(void);
 
 #endif /* FUNCTIONS_H_ */
