@@ -1,40 +1,42 @@
-/**
- * \file
- *
- * \brief Empty user application template
- *
- */
+/********************************************************
+ Name          : main.c
+ Author        : Marcus Jansson
+ Copyright     : GPL
+ Description   : EVK1100 template
+ **********************************************************/
 
-/**
- * \mainpage User Application template doxygen documentation
- *
- * \par Empty user application template
- *
- * Bare minimum empty user application template
- *
- * \par Content
- *
- * -# Include the ASF header files (through asf.h)
- * -# "Insert system clock initialization code here" comment
- * -# Minimal main function that starts with a call to board_init()
- * -# "Insert application code here" comment
- *
- */
+// Include Files
+#include "board.h"
+#include "adc.h"
+#include "display_init.h"
 
-/*
- * Include header files for all drivers that have been imported from
- * Atmel Software Framework (ASF).
- */
-/*
- * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
- */
-#include <asf.h>
-
-int main (void)
+int main(void)
 {
-	/* Insert system clock initialization code here (sysclk_init()). */
+   int pot_value;
+   int brightness_LED5;
 
-	board_init();
+   // Configure the ADC module and enable the potentiometer channel
+   adc_configure(&AVR32_ADC);
+   adc_enable(&AVR32_ADC, ADC_POTENTIOMETER_CHANNEL);
+   
+   // INit the display
+   display_init();
 
-	/* Insert application code here, after the board has been initialized. */
+   while(true)
+   {
+		// Start a ADC sampling of all active channels
+		adc_start(&AVR32_ADC);
+
+		// Get the potentiometer value
+		pot_value = adc_get_value(&AVR32_ADC, ADC_POTENTIOMETER_CHANNEL);
+
+		// Convert the potentiometer value to a value btwn 0-255
+		brightness_LED5 = pot_value * 255 / 1024;
+
+		// Set the intensity of the LED
+		LED_Set_Intensity(LED4, brightness_LED5);
+   }
+
+   // Never return from main
+   while(true);
 }
