@@ -52,6 +52,9 @@
  * running the ASF driver selector tool. Any changes will be discarded.
  */
 
+// From module: ADC - Analog to Digital Converter
+#include <adc.h>
+
 // From module: Compiler abstraction layer and code utilities
 #include <compiler.h>
 #include <status_codes.h>
@@ -64,6 +67,9 @@
 
 // From module: Generic board support
 #include <board.h>
+
+// From module: INTC - Interrupt Controller
+#include <intc.h>
 
 // From module: Interrupt management - UC3 implementation
 #include <interrupt.h>
