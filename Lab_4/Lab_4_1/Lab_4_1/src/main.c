@@ -21,6 +21,19 @@ int main(void)
    
    // INit the display
    display_init();
+   dip204_set_cursor_position(1,1);
+   dip204_write_string("Potentiometer:"); // 14 length
+   dip204_set_cursor_position(1,2);
+   dip204_write_string("Light Sensor:"); // 13 length
+   dip204_set_cursor_position(1,3);
+   dip204_write_string("Temperature:"); // 12 length
+   dip204_set_cursor_position(16,1);
+   dip204_write_string("15");
+   dip204_set_cursor_position(15,2);
+   dip204_write_string("15");
+   dip204_set_cursor_position(14,3);
+   dip204_write_string("15");
+   
 
    while(true)
    {
