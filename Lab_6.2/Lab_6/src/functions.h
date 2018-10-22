@@ -46,6 +46,6 @@ void USART_init(void);
 void vSemaphoreTask(void* pvParameters);
 void vLCDTask(void* pvParameters);
 void vButtonTASK(void* pvParameters);
-void vUSARTTask(void* pvParameters);
+void vCountTASK(void* pvParameters);
 
 #endif /* FUNCTIONS_H_ */
