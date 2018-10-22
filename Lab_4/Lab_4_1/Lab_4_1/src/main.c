@@ -12,12 +12,14 @@
 
 int main(void)
 {
-   int pot_value;
+   int pot_value, temp_value, light_value;
    int brightness_LED5;
 
    // Configure the ADC module and enable the potentiometer channel
    adc_configure(&AVR32_ADC);
    adc_enable(&AVR32_ADC, ADC_POTENTIOMETER_CHANNEL);
+   adc_enable(&AVR32_ADC, ADC_TEMPERATURE_CHANNEL);
+   adc_enable(&AVR32_ADC, ADC_LIGHT_CHANNEL);
    
    // INit the display
    display_init();
@@ -27,12 +29,7 @@ int main(void)
    dip204_write_string("Light Sensor:"); // 13 length
    dip204_set_cursor_position(1,3);
    dip204_write_string("Temperature:"); // 12 length
-   dip204_set_cursor_position(16,1);
-   dip204_write_string("15");
-   dip204_set_cursor_position(15,2);
-   dip204_write_string("15");
-   dip204_set_cursor_position(14,3);
-   dip204_write_string("15");
+
    
 
    while(true)
@@ -42,6 +39,16 @@ int main(void)
 
 		// Get the potentiometer value
 		pot_value = adc_get_value(&AVR32_ADC, ADC_POTENTIOMETER_CHANNEL);
+		light_value = adc_get_value(&AVR32_ADC, ADC_LIGHT_CHANNEL);
+		temp_value = adc_get_value(&AVR32_ADC, ADC_TEMPERATURE_CHANNEL);
+		
+		// Print values to screen
+		dip204_set_cursor_position(16,1); // Potentiometer
+		dip204_printf_string("%03d", pot_value * 255 / 1024);
+		dip204_set_cursor_position(15,2); // Light
+		dip204_printf_string("%04d", light_value);
+		dip204_set_cursor_position(14,3); // Temp
+		dip204_printf_string("%04d", temp_value);
 
 		// Convert the potentiometer value to a value btwn 0-255
 		brightness_LED5 = pot_value * 255 / 1024;
