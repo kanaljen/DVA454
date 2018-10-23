@@ -11,6 +11,7 @@
 #include "stdio.h"
 #include "display_init.h"
 #include "adc.h"
+#include "dip204.h"
 #include <stdio.h>
 
 #ifndef FUNCTIONS_H_
@@ -40,6 +41,7 @@
 #define serialPORT_USART_IRQ AVR32_USART1_IRQ
 #define serialPORT_USART_BAUDRATE 9600
 
+#define DIP204_WRITE_DATA 0xFA
 #define buffer_size 10
 
 void USART_init(void);
@@ -47,5 +49,8 @@ void vSemaphoreTask(void* pvParameters);
 void vLCDTask(void* pvParameters);
 void vButtonTASK(void* pvParameters);
 void vCountTASK(void* pvParameters);
+void vSemaphoreTask( void * pvParameters );
+void vDisplayPrintMSG(void);
+void vGetMSGTASK(void* pvParameters);
 
 #endif /* FUNCTIONS_H_ */

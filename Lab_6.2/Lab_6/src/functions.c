@@ -1,5 +1,8 @@
 #include "functions.h"
-int count = 0;
+int charCount = 0;
+xSemaphoreHandle xSem = NULL;
+char message[60];
+int msglen;
 
 void USART_init(void)
 {
@@ -13,6 +16,7 @@ void USART_init(void)
 		{ configDBG_USART_RX_PIN , configDBG_USART_RX_FUNCTION },
 		{ configDBG_USART_TX_PIN , configDBG_USART_TX_FUNCTION }
 	};
+	
 	static const usart_options_t USART_OPTIONS =
 	{
 		.baudrate = 9600,
@@ -21,83 +25,108 @@ void USART_init(void)
 		.stopbits = USART_1_STOPBIT ,
 		.channelmode = USART_NORMAL_CHMODE
 	};
+	
 	pm_switch_to_osc0(&AVR32_PM , FOSC0 , OSC0_STARTUP);
 	gpio_enable_module(USART_SERIAL_GPIO_MAP , 2);
 	gpio_enable_module(USART_DEBUG_GPIO_MAP , 2);
-	usart_init_rs232(serialPORT_USART , &USART_OPTIONS , FOSC0);
 	usart_init_rs232(configDBG_USART , &USART_OPTIONS , FOSC0);
 	
 	usart_write_line(configDBG_USART , "USART Initialized\n");
-	
+	vSemaphoreCreateBinary(xSem);
+	usart_write_line(configDBG_USART, "Semaphore Created\n");
 }
-
-void vLCDTask(void* pvParameters) {
-	//char buffer[buffer_size];
-	char single_char;
-	int c, k, ret; 
-	const portTickType delay = 1000; //10 sec
-	portTickType xLastWakeTime;
+void vDisplayPrintMSG(void)
+{
+	usart_write_line(configDBG_USART , message);
+	usart_write_line(configDBG_USART , "\n");
 	
-	while(1) {
+	xSemaphoreTake(xSem, (portTickType) portMAX_DELAY);
 		
-		
-			k=1;		
+	dip204_set_cursor_position(1,1);
+	dip204_write_string("                    ");
+	dip204_write_string("                    ");
+	dip204_write_string("                    ");
+	dip204_set_cursor_position(1,1);
+	dip204_write_string(message);
 	
+	xSemaphoreGive(xSem);
+}
+void vGetMSGTASK(void* pvParameters)
+{
+	int i = 0;
+	
+	while(1)
+	{
 		
-		while (usart_read_char(configDBG_USART, &c) == USART_SUCCESS) {
-			c=usart_getchar(configDBG_USART);
+		while(!(USART->CSR.rxrdy));
 		
-			sprintf(single_char, "%c", c);
-			dip204_set_cursor_position(k, 1);
-			dip204_printf_string(single_char);
-			k++;
-			count++;
+		xSemaphoreTake(xSem, (portTickType) portMAX_DELAY);
+		
+		do{
+			if(USART->CSR.rxrdy)
+			{
+				message[i] = USART->RHR.rxchr;
+				i++;
+				charCount++;
+			}
 		}
-	
+		while(message[i-1] != '\n');
+				
+		charCount = charCount - 2;
 		
+		xSemaphoreGive(xSem);
+		
+		message[i-2] = '\0';
+		i = 0;
+		
+		vDisplayPrintMSG();
 	}
 }
-
 void vButtonTASK(void* pvParameters)
 {
 	volatile int button_state0; //Initialize button state 0
-	xTaskHandle task  = *(xTaskHandle *)pvParameters; //Blink LED handle
+	xTaskHandle task  = *(xTaskHandle *)pvParameters;
 	portTickType xLastWakeTime;
 	const portTickType delay = 10000; //10 sec
 	char str;
-	
+	portTickType startTick, stopTick;
+	int currentCount = 9999;
 	
 	while(1){
 		
 		button_state0 = AVR32_GPIO.port[BUTTON_PORT0].pvr & BUTTON_PIN0; //Read button
 		
 		if(!button_state0){ //If button is pushed
-			usart_write_line(configDBG_USART , "Button 0 pressed\n");
 			
-
 			dip204_set_cursor_position(1, 4);
 			sprintf(str, "#Char:");
 			dip204_printf_string(str);
+			startTick = xTaskGetTickCount();
 			
-			vTaskResume(task);
-			xLastWakeTime = xTaskGetTickCount();
-			vTaskDelayUntil(&xLastWakeTime, delay); //Delays 10 sec
-			vTaskSuspend(task);
+			do
+			{
+				if(currentCount != charCount)
+				{
+					xSemaphoreTake(xSem, (portTickType) portMAX_DELAY);			
+					sprintf(str, "%d", charCount);
+							
+					dip204_set_cursor_position(8, 4);
+					dip204_printf_string(str);
+					
+					currentCount = charCount;
+					
+					xSemaphoreGive(xSem);
+				}
+				
+				stopTick = xTaskGetTickCount();
+			} while ((stopTick - startTick) < 10000);
 			
-			dip204_clear_display();
+			currentCount = 9999;
+			
+			dip204_set_cursor_position(1,4);
+			dip204_write_string("                    ");
 		}
 	}
 }
 
-void vCountTASK(void* pvParameters) {
 
-
-	char str;
-	vTaskSuspend(NULL);
-	while(1){
-		sprintf(str, "%d", count);
-		dip204_set_cursor_position(8, 4);
-		dip204_printf_string(str);
-	}
-}
-		
