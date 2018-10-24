@@ -2,8 +2,8 @@
 
 int main(void)
 {	
-	usart_init();
 	display_init();
+	usart_init();
 	SENSOR_init(); 	
 	QUEUE_init();
 	

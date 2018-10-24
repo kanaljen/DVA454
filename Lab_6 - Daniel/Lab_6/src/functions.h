@@ -34,7 +34,16 @@
 #define serialPORT_USART_TX_PIN AVR32_USART1_TXD_0_0_PIN
 #define serialPORT_USART_TX_FUNCTION AVR32_USART1_TXD_0_0_FUNCTION
 #define serialPORT_USART_IRQ AVR32_USART1_IRQ
-#define serialPORT_USART_BAUDRATE 9600
+#define serialPORT_USART_BAUDRATE 921600
+
+struct Message
+{
+	int tmp;
+	int pot;
+	int ldr;
+	int id;
+	
+}mess;
 
 void usart_init(void);
 void vQueueTASK(void);
