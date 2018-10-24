@@ -35,12 +35,19 @@ void USART_init(void)
 
 void vProducerTask(void* pvParameters)
 {
+	
+	/* This function will produce "an item" and add it to a buffer
+	   and when the buffer is full it will go to sleep, if the buffer 
+	   has 1 item, it will wake the consumer */
+	
 	xTaskHandle ConsumerTaskHandle = *(xTaskHandle *)pvParameters;
 	int item;
 	char char_buffer[16];
 	
 	while(1)
 	{
+		/* The producer first checks if the buffer is full, if so it goes to sleep 
+		   and gives an alert, same when it awakens */
 		if(itemCount == buffer_size)
 		{
 			taskENTER_CRITICAL();
@@ -53,10 +60,16 @@ void vProducerTask(void* pvParameters)
 			usart_write_line(configDBG_USART, "Producer Awakened\n");
 			taskEXIT_CRITICAL();
 		}
+			
+		/* The producer and consumer keeps track of the items they add 
+		   or subtract with the "itemCount" variable */
 		
 		buffer[itemCount] = itemCount + 1;
 		item = buffer[itemCount];
 		itemCount++;
+		
+		/* If the buffer has 1 item, it is not empty and it will try to wake
+		   the consumer with no regards to if it is sleeping or not */
 		
 		if(itemCount == 1)
 		{
@@ -72,6 +85,9 @@ void vProducerTask(void* pvParameters)
 }
 void vConsumerTask(void* pvParameters)
 {
+	/* This function will consume "an item" from a buffer, if the buffer
+	   is empty, it will go to sleep and if the buffer is not full it
+	   will try to wake the producer */
 	
 	xTaskHandle ProducerTaskHandle = *(xTaskHandle *)pvParameters;
 	int item;
@@ -79,6 +95,8 @@ void vConsumerTask(void* pvParameters)
 	
 	while(1)
 	{
+		/* The consumer checks if there are any items to consume, otherwise
+		   the consumer will go to sleep */
 		
 		if(itemCount == 0)
 		{
@@ -93,9 +111,15 @@ void vConsumerTask(void* pvParameters)
 			taskEXIT_CRITICAL();
 		}
 		
+		/* Whenever the consumer consumes an item, it subtracts 1 from the
+		   itemCount variable, when an item is removed it is replaced by 0 */
+		
 		item = buffer[itemCount-1];
 		buffer[itemCount-1] = 0;
 		itemCount--;
+		
+		/* If the buffer is not full, the consumer will try to wake the producer 
+		   regardless of if it is sleeping or not */
 		
 		if(itemCount == buffer_size - 1)
 		{

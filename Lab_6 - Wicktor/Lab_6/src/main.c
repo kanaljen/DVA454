@@ -2,8 +2,7 @@
 
 int main(void)
 {	
-	xTaskHandle *ProducerTaskHandle = malloc(sizeof(xTaskHandle*));
-	xTaskHandle *ConsumerTaskHandle = malloc(sizeof(xTaskHandle*));
+	// Initialization 
 	usart_init();
 	display_init();
 	sensor_init(); 	

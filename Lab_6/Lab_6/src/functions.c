@@ -35,18 +35,27 @@ void USART_init(void)
 }
 void vSemaphoreTask( void * pvParameters )
 {
+	
 	vSemaphoreCreateBinary(xSem);
 	vTaskSuspend(NULL);
 }
 
 void vProducerTask(void* pvParameters)
 {
+	/* This function will produce "an item" and add it to a buffer
+	   and when the buffer is full it will go to sleep, if the buffer 
+	   has 1 item, it will wake the consumer */
+	
+	
 	xTaskHandle ConsumerTaskHandle = *(xTaskHandle *)pvParameters;
 	int item;
 	char char_buffer[16];
 		
 	while(1)
 	{	
+		/* The producer first checks if the buffer is full, if so it goes to sleep 
+		   and gives an alert, same when it awakens */
+		
 		if(itemCount == buffer_size)
 		{
 			taskENTER_CRITICAL();
@@ -58,6 +67,8 @@ void vProducerTask(void* pvParameters)
 			taskEXIT_CRITICAL();
 		}  
 		
+		/* First check if a semaphore is created, then wait for it forever */
+		
 		if(xSem != NULL)
 		{
 			while(xSemaphoreTake(xSem, (portTickType) 0) != pdPASS);
@@ -65,6 +76,9 @@ void vProducerTask(void* pvParameters)
 			usart_write_line(configDBG_USART, "Producer took Semaphore\n");
 			taskEXIT_CRITICAL();
 		}
+		
+		/* The itemCount variable is protected by the semaphore, so the consumer cannot 
+		   subtract anything while the producer is adding something */
 		
 		buffer[itemCount] = itemCount + 1;
 		item = buffer[itemCount];
@@ -75,6 +89,9 @@ void vProducerTask(void* pvParameters)
 		usart_write_line(configDBG_USART, "Producer gave Semaphore\n");
 		taskEXIT_CRITICAL();
 		xSemaphoreGive(xSem);
+		
+		/* If the buffer has 1 item, it is not empty and it will try to wake
+		   the consumer with no regards to if it is sleeping or not */
 		
 		if(itemCount == 1)
 		{
@@ -89,6 +106,9 @@ void vProducerTask(void* pvParameters)
 }
 void vConsumerTask(void* pvParameters)
 {
+	/* This function will consume "an item" from a buffer, if the buffer
+	   is empty, it will go to sleep and if the buffer is not full it
+	   will try to wake the producer */
 	
 	xTaskHandle ProducerTaskHandle = *(xTaskHandle *)pvParameters;
 	int item;
@@ -96,6 +116,10 @@ void vConsumerTask(void* pvParameters)
 		
 	while(1)
 	{
+		
+		/* The consumer checks if there are any items to consume, otherwise
+		   the consumer will go to sleep */
+		
 		if(itemCount == 0)
 		{
 			for(int i = 0; i < 100; i++);
@@ -108,6 +132,8 @@ void vConsumerTask(void* pvParameters)
 			taskEXIT_CRITICAL();
 		}
 		
+		/* First check if a semaphore is created, then wait for ever to take it */
+		
 		if(xSem != NULL)
 		{
 			while(xSemaphoreTake(xSem, (portTickType) 0) != pdPASS);
@@ -116,6 +142,8 @@ void vConsumerTask(void* pvParameters)
 			taskEXIT_CRITICAL();
 		}
 		
+		/* The producer cannot add to the itemCount while consumer is consuming */
+	
 		item = buffer[itemCount-1];
 		itemCount--;
 		
@@ -125,6 +153,9 @@ void vConsumerTask(void* pvParameters)
 		taskEXIT_CRITICAL();
 		
 		xSemaphoreGive(xSem);
+		
+		/* If the buffer is not full, the consumer will try to wake the producer 
+		   regardless of if it is sleeping or not */
 		
 		if(itemCount == buffer_size - 1)
 		{

@@ -37,8 +37,15 @@ void USART_init(void)
 }
 void vDisplayPrintMSG(void)
 {
+	/* This function is used in the get msg task to print the msg.
+	   It first clears the lines so nothing old is left and prints
+	   your msg to the serial monitor */
+	
 	usart_write_line(configDBG_USART , message);
 	usart_write_line(configDBG_USART , "\n");
+	
+	/* Since more than once task manipulates the cursor position, 
+	   this part is protected by a semaphore. */
 	
 	xSemaphoreTake(xSem, (portTickType) portMAX_DELAY);
 		
@@ -57,10 +64,18 @@ void vGetMSGTASK(void* pvParameters)
 	
 	while(1)
 	{
-		
+		/* Wait until there is something at the serial to read */
 		while(!(USART->CSR.rxrdy));
 		
+		/* Since multiple task use the charCount, this part is proctected by a semaphore */
+		
 		xSemaphoreTake(xSem, (portTickType) portMAX_DELAY);
+		
+		/* Reads every char and puts it into a buffer, stops when it reaches '\n'
+		   which means this must be added in the serial monitor
+		   
+		   For each character read, it will add 1 to the charCount to keep track of 
+		   the amount of characters written */
 		
 		do{
 			if(USART->CSR.rxrdy)
@@ -72,9 +87,13 @@ void vGetMSGTASK(void* pvParameters)
 		}
 		while(message[i-1] != '\n');
 				
+		/* Subtract 2 to exclude \r\n to the charCount */		
+				
 		charCount = charCount - 2;
 		
 		xSemaphoreGive(xSem);
+		
+		/* We want each msg to end with \0 */
 		
 		message[i-2] = '\0';
 		i = 0;
@@ -84,6 +103,9 @@ void vGetMSGTASK(void* pvParameters)
 }
 void vButtonTASK(void* pvParameters)
 {
+	/* This task wait until a button is pressed, then prints the total amount 
+	   of characters for 10 seconds and updates this continuously if more comes */
+	
 	volatile int button_state0; //Initialize button state 0
 	xTaskHandle task  = *(xTaskHandle *)pvParameters;
 	portTickType xLastWakeTime;
@@ -103,10 +125,17 @@ void vButtonTASK(void* pvParameters)
 			dip204_printf_string(str);
 			startTick = xTaskGetTickCount();
 			
+			/* For 10000 ticks (10 s), prints charCount to LCD */
 			do
-			{
+			{   
+				
+				/* Only prints the charCount if it is updated or it is the first time
+				   since a button event (currentCount = 9999 so they wont match first time) */
 				if(currentCount != charCount)
 				{
+					/* Since we move the cursor and use the charCount, this part is protected 
+					   by semaphore */
+					
 					xSemaphoreTake(xSem, (portTickType) portMAX_DELAY);			
 					sprintf(str, "%d", charCount);
 							
@@ -121,6 +150,7 @@ void vButtonTASK(void* pvParameters)
 				stopTick = xTaskGetTickCount();
 			} while ((stopTick - startTick) < 10000);
 			
+			/* Reset currentCount so it will not be equal to charCount the next button event */
 			currentCount = 9999;
 			
 			dip204_set_cursor_position(1,4);
