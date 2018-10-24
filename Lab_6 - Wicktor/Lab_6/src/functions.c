@@ -56,6 +56,7 @@ void vDisplayTask(void)
 	char LS[8];
 	char USART_buffer[32];
 	int k = 0;
+	int d = 0;
 	
 	dip204_set_cursor_position(1,1);
 	dip204_write_string("Sensors Monitor 2000");
@@ -109,8 +110,14 @@ void vDisplayTask(void)
 			dip204_set_cursor_position(6, 4);
 			dip204_write_string(LS);
 		}
-		sprintf(USART_buffer, "\033[2J\033cPot: %d\n Tmp: %d\n LS: %2d", pot, temp, LS);
-		usart_write_line(USART_buffer);
+		
+		if (d==50)
+		{
+			sprintf(USART_buffer, "\033[2J\033cPot: %d Tmp: %d LS: %d", PotValue, TempValue, LSValue);
+			usart_write_line(configDBG_USART ,USART_buffer);
+			d=0;
+		}
+		d++;
 		k++;
 	}
 }
