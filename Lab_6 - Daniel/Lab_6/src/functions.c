@@ -2,7 +2,7 @@
 xSemaphoreHandle xSem = NULL;
 xQueueHandle xQueue;
 
-void sensor_init(void)
+void SENSOR_init(void)
 {
 	adc_configure(&AVR32_ADC);
 	adc_enable(&AVR32_ADC, ADC_POTENTIOMETER_CHANNEL);
@@ -11,7 +11,7 @@ void sensor_init(void)
 	
 	usart_write_line(configDBG_USART , "Sensors Initialized\n");
 }
-void queue_init(void){
+void QUEUE_init(void){
 	xQueue = xQueueCreate(30, sizeof( struct Message));
 	usart_write_line(configDBG_USART , "Queue Initialized\n");
 }
@@ -43,89 +43,129 @@ void usart_init(void)
 	
 	usart_write_line(configDBG_USART , "USART Initialized\n");
 }
-void vLCDTASK(void* pvParameters)
+void vQueueTASK(void)
 {
-	int pot_value;
-	int tmp_value;
-	int ldr_value;
 	struct Message *msg;
-	char pot[10];
+	char pot[16];
+	char tmp[16];
+	char ldr[16];
 	
 	
 	signed portBASE_TYPE ret;
 	
 	while(1)
 	{
+		usart_write_line(configDBG_USART , "TEST1\n");
+		if (uxQueueMessagesWaiting( xQueue ) > 0)
+		{
+			xQueueReceive(xQueue, &(msg->pot), (portTickType) 10);
+			
+			if(msg->pot != 0)
+			{
+				sprintf(pot, "%d", msg->pot);
+				dip204_set_cursor_position(6, 1);
+				dip204_write_string("    ");
+				dip204_set_cursor_position(6, 1);
+				dip204_write_string(pot);
+			}
+			
+			xQueueReceive(xQueue, &(msg->tmp), (portTickType) 10);
+			
+			if(msg->pot != 0)
+			{
+				sprintf(tmp, "%d", msg->tmp);
+				dip204_set_cursor_position(6, 2);
+				dip204_write_string("    ");
+				dip204_set_cursor_position(6, 2);
+				dip204_write_string(tmp);
+			}
 		
-		// 		pot_value = adc_get_value(&AVR32_ADC, ADC_POTENTIOMETER_CHANNEL);
-		// 			usart_write_line(configDBG_USART , ("%d\n", pot_value));
-		//xQueueReceive( xQueue, &(msg), (portTickType) 10 );
-		//pot_value = msg->pot_value;
-		
-		
-		// 			dip204_set_cursor_position(1,1);
-		// 			dip204_write_string(msg->pot_value);
+			xQueueReceive(xQueue, &(msg->ldr), (portTickType) 10);
+			
+			if(msg->pot != 0)
+			{
+				sprintf(ldr, "%d", msg->ldr);
+				dip204_set_cursor_position(6, 3);
+				dip204_write_string("    ");
+				dip204_set_cursor_position(6, 3);
+				dip204_write_string(ldr);
+			}
+		}
 		
 	}
 }
-void vPotTASK(void* pvParameters)
+void vPotTASK(void)
 {
-	
-	int potvalue;
-	struct Message *msg;
-	const char buffer[16];
+	int i, pot_average;
+	struct Message *pot_value;
+	pot_value->ldr = 0;
+	pot_value->tmp = 0;
 	
 	while(1)
 	{
-		adc_start(&AVR32_ADC);
-		potvalue = adc_get_value(&AVR32_ADC, ADC_POTENTIOMETER_CHANNEL); //Read potentiometer value
-		usart_write_line(configDBG_USART , "gay\n");
+		usart_write_line(configDBG_USART , "TEST\n");
+		for(i = 1; i <= 50; i++) // Collecting 50 samples
+		{
+			adc_start(&AVR32_ADC);
+			pot_value->pot = adc_get_value(&AVR32_ADC, ADC_POTENTIOMETER_CHANNEL); //Read potentiometer value
+			pot_average = pot_average + pot_value->pot;
+			usart_write_line(configDBG_USART , "TEST\n");
+		}
 		
-		sprintf(buffer, "POT: %d", potvalue);
-		dip204_set_cursor_position(1, 2);
-		dip204_printf_string(buffer);
+		pot_average = pot_average / i;
+		pot_value->pot = pot_average;
+		pot_average=0;
 		
-		// 		msg->pot_value = pot_value;
-		// 		sprintf(buffer, "%d", pot_value);
-		//		usart_write_line(configDBG_USART , "då\n");
-		// 		if( xQueue != NULL )
-		// 						xQueueSend( xQueue, &msg, (portTickType) 10);
+		xQueueSend(xQueue, &(pot_value->pot), (portTickType) 10);
 	}
 }
-void vTmpTASK(void* pvParameters){ 
-
-	int tmp_value;
-	char buffer[20];
-
+void vTmpTASK(void)
+{
+	int i, tmp_average;
+	struct Message *tmp_value;
+	tmp_value->ldr = 0;
+	tmp_value->pot = 0;
+	
 	while(1)
 	{
-		//	   tmp_value = adc_get_value(&AVR32_ADC, ADC_TEMPERATURE_CHANNEL); //Read temperature value
+		usart_write_line(configDBG_USART , "TEST\n");
+		for(i = 1; i <= 50; i++) // Collecting 50 samples
+		{
+			adc_start(&AVR32_ADC);
+			tmp_value->tmp = adc_get_value(&AVR32_ADC, ADC_TEMPERATURE_CHANNEL); //Read potentiometer value
+			tmp_average = tmp_average + tmp_value->tmp;
+			usart_write_line(configDBG_USART , "TEST\n");
+		}
 		
+		tmp_average = tmp_average / i;
+		tmp_value->tmp = tmp_average;
+		tmp_average=0;
 		
-		// 		sprintf(buffer, "TMP: %d", tmp_value);
-		//
-		// 		dip204_set_cursor_position(1, 1);
-		// 		dip204_printf_string(buffer);
-		
-		
-		
-		
+		xQueueSend(xQueue, &(tmp_value->tmp), (portTickType) 10);
 	}
 }
-void vLdrTASK(void* pvParameters) {
-	
-	int ldr_value;
-	char buffer[20];
+void vLdrTASK(void) 
+{
+	int i, ldr_average;
+	struct Message *ldr_value;
+	ldr_value->pot = 0;
+	ldr_value->tmp = 0;
 	
 	while(1)
 	{
-		//	   usart_write_line(configDBG_USART , "n\n");
+		usart_write_line(configDBG_USART , "TEST\n");
+		for(i = 1; i <= 50; i++) // Collecting 50 samples
+		{
+			adc_start(&AVR32_ADC);
+			ldr_value->ldr = adc_get_value(&AVR32_ADC, ADC_LIGHT_CHANNEL); //Read potentiometer value
+			ldr_average = ldr_average + ldr_value->ldr;
+			usart_write_line(configDBG_USART , "TEST\n");
+		}
 		
-		//	   ldr_value = adc_get_value(&AVR32_ADC, ADC_LIGHT_CHANNEL); //Read light sensor value
+		ldr_average = ldr_average / i;
+		ldr_value->ldr = ldr_average;
+		ldr_average=0;
 		
-		// 	   sprintf(buffer, "LDR: %d", ldr_value);
-		//
-		// 	   dip204_set_cursor_position(1, 3);
-		// 	   dip204_printf_string(buffer);
+		xQueueSend(xQueue, &(ldr_value->ldr), (portTickType) 10);
 	}
 }
