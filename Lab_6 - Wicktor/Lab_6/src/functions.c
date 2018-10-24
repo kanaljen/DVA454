@@ -32,12 +32,12 @@ void usart_init(void)
 	usart_write_line(configDBG_USART , "USART Initialized\n");
 }
 void sensor_init(void)
-{ 
-	 adc_configure(&AVR32_ADC);
-	 adc_enable(&AVR32_ADC, ADC_POTENTIOMETER_CHANNEL);
-	 adc_enable(&AVR32_ADC, ADC_TEMPERATURE_CHANNEL);
-	 adc_enable(&AVR32_ADC, ADC_LIGHT_CHANNEL);
-	 
+{
+	adc_configure(&AVR32_ADC);
+	adc_enable(&AVR32_ADC, ADC_POTENTIOMETER_CHANNEL);
+	adc_enable(&AVR32_ADC, ADC_TEMPERATURE_CHANNEL);
+	adc_enable(&AVR32_ADC, ADC_LIGHT_CHANNEL);
+	
 }
 void queue_init(void)
 {
@@ -48,13 +48,13 @@ void queue_init(void)
 void vDisplayTask(void)
 {
 	/* This task communicates with sensor input task and display
-	   the values it gets from those with the help of msg queues */
+	the values it gets from those with the help of msg queues */
 	
 	int PotValue = 0, TempValue = 0, LSValue = 0;
 	char pot[8];
 	char temp[8];
 	char LS[8];
-	char counter[8];
+	char USART_buffer[32];
 	int k = 0;
 	
 	dip204_set_cursor_position(1,1);
@@ -73,39 +73,44 @@ void vDisplayTask(void)
 			xQueueReceive(xQueuePot, &PotValue, (portTickType) 5);
 			
 			sprintf(pot, "%d", PotValue);
-			dip204_set_cursor_position(6, 2);
-			dip204_write_string("    ");
+			if(k % 10)
+			{
+				dip204_set_cursor_position(6, 2);
+				dip204_write_string("    ");
+			}
 			dip204_set_cursor_position(6, 2);
 			dip204_write_string(pot);
 		}
 		
 		if (uxQueueMessagesWaiting( xQueueTemp ) > 0)
-			{
+		{
 			xQueueReceive(xQueueTemp, &TempValue, (portTickType) 20);
-		
+			
 			sprintf(temp, "%d", TempValue);
-			dip204_set_cursor_position(6, 3);
-			dip204_write_string("    ");
+			if(k % 10)
+			{
+				dip204_set_cursor_position(6, 3);
+				dip204_write_string("    ");
+			}
 			dip204_set_cursor_position(6, 3);
 			dip204_write_string(temp);
-			}
+		}
 		
 		if (uxQueueMessagesWaiting( xQueueLS ) > 0)
+		{
+			xQueueReceive(xQueueLS, &LSValue, (portTickType) 10);
+			
+			sprintf(LS, "%d", LSValue);
+			if(k % 10)
 			{
-				xQueueReceive(xQueueLS, &LSValue, (portTickType) 10);
-				
-				sprintf(LS, "%d", LSValue);
 				dip204_set_cursor_position(6, 4);
 				dip204_write_string("    ");
-				dip204_set_cursor_position(6, 4);
-				dip204_write_string(LS);
 			}
-		
-		
-		
-		sprintf(counter, "ctr: %d", k);
-		dip204_set_cursor_position(12, 2);
-		dip204_write_string(counter);
+			dip204_set_cursor_position(6, 4);
+			dip204_write_string(LS);
+		}
+		sprintf(USART_buffer, "\033[2J\033cPot: %d\n Tmp: %d\n LS: %2d", pot, temp, LS);
+		usart_write_line(USART_buffer);
 		k++;
 	}
 }
