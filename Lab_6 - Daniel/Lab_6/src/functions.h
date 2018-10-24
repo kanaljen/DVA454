@@ -36,13 +36,6 @@
 #define serialPORT_USART_IRQ AVR32_USART1_IRQ
 #define serialPORT_USART_BAUDRATE 9600
 
-struct Message
-{
-	int tmp;
-	int pot;
-	int ldr;	
-};
-
 void usart_init(void);
 void vQueueTASK(void);
 void vPotTASK(void);

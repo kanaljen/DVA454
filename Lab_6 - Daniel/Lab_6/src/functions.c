@@ -1,6 +1,12 @@
 #include "functions.h"
-xSemaphoreHandle xSem = NULL;
-xQueueHandle xQueue;
+xQueueHandle xQueue = NULL;
+
+struct Message
+{
+	int tmp;
+	int pot;
+	int ldr;	
+};
 
 void SENSOR_init(void)
 {
@@ -11,9 +17,11 @@ void SENSOR_init(void)
 	
 	usart_write_line(configDBG_USART , "Sensors Initialized\n");
 }
-void QUEUE_init(void){
-	xQueue = xQueueCreate(30, sizeof( struct Message));
-	usart_write_line(configDBG_USART , "Queue Initialized\n");
+void QUEUE_init(void)
+{
+	
+	xQueue = xQueueCreate(10, sizeof(struct Message));
+	usart_write_line(configDBG_USART, "Queue Initialized\n");
 }
 void usart_init(void)
 {
@@ -55,10 +63,17 @@ void vQueueTASK(void)
 	
 	while(1)
 	{
+		taskENTER_CRITICAL();
 		usart_write_line(configDBG_USART , "TEST1\n");
+		taskEXIT_CRITICAL();
+		
+		if(xQueue != NULL) usart_write_line(configDBG_USART, "NULL \n");
+		else usart_write_line(configDBG_USART, "NOT NULL!! \n");
+		
 		if (uxQueueMessagesWaiting( xQueue ) > 0)
 		{
-			xQueueReceive(xQueue, &(msg->pot), (portTickType) 10);
+			usart_write_line(configDBG_USART, "IM HERE!! \n");
+			xQueueReceive(xQueue, &msg, (portTickType) 10);
 			
 			if(msg->pot != 0)
 			{
@@ -69,7 +84,7 @@ void vQueueTASK(void)
 				dip204_write_string(pot);
 			}
 			
-			xQueueReceive(xQueue, &(msg->tmp), (portTickType) 10);
+			xQueueReceive(xQueue, &msg, (portTickType) 10);
 			
 			if(msg->pot != 0)
 			{
@@ -80,7 +95,7 @@ void vQueueTASK(void)
 				dip204_write_string(tmp);
 			}
 		
-			xQueueReceive(xQueue, &(msg->ldr), (portTickType) 10);
+			xQueueReceive(xQueue, &msg, (portTickType) 10);
 			
 			if(msg->pot != 0)
 			{
@@ -91,6 +106,7 @@ void vQueueTASK(void)
 				dip204_write_string(ldr);
 			}
 		}
+		else usart_write_line(configDBG_USART, "Queue EMTPTY\n");
 		
 	}
 }
@@ -103,7 +119,9 @@ void vPotTASK(void)
 	
 	while(1)
 	{
-		usart_write_line(configDBG_USART , "TEST\n");
+		taskENTER_CRITICAL();
+		usart_write_line(configDBG_USART , "TEST2\n");
+		taskEXIT_CRITICAL();
 		for(i = 1; i <= 50; i++) // Collecting 50 samples
 		{
 			adc_start(&AVR32_ADC);
@@ -116,7 +134,7 @@ void vPotTASK(void)
 		pot_value->pot = pot_average;
 		pot_average=0;
 		
-		xQueueSend(xQueue, &(pot_value->pot), (portTickType) 10);
+		xQueueSend(xQueue, &pot_value, (portTickType) 10);
 	}
 }
 void vTmpTASK(void)
@@ -128,7 +146,9 @@ void vTmpTASK(void)
 	
 	while(1)
 	{
-		usart_write_line(configDBG_USART , "TEST\n");
+		taskENTER_CRITICAL();
+		usart_write_line(configDBG_USART , "TEST3\n");
+		taskEXIT_CRITICAL();
 		for(i = 1; i <= 50; i++) // Collecting 50 samples
 		{
 			adc_start(&AVR32_ADC);
@@ -141,7 +161,7 @@ void vTmpTASK(void)
 		tmp_value->tmp = tmp_average;
 		tmp_average=0;
 		
-		xQueueSend(xQueue, &(tmp_value->tmp), (portTickType) 10);
+		xQueueSend(xQueue, &tmp_value, (portTickType) 10);
 	}
 }
 void vLdrTASK(void) 
@@ -153,7 +173,10 @@ void vLdrTASK(void)
 	
 	while(1)
 	{
-		usart_write_line(configDBG_USART , "TEST\n");
+		taskENTER_CRITICAL();
+		usart_write_line(configDBG_USART , "TEST3\n");
+		taskEXIT_CRITICAL();
+		
 		for(i = 1; i <= 50; i++) // Collecting 50 samples
 		{
 			adc_start(&AVR32_ADC);
@@ -166,6 +189,7 @@ void vLdrTASK(void)
 		ldr_value->ldr = ldr_average;
 		ldr_average=0;
 		
-		xQueueSend(xQueue, &(ldr_value->ldr), (portTickType) 10);
+		xQueueSend(xQueue, &ldr_value, (portTickType) 10);
 	}
+	
 }
