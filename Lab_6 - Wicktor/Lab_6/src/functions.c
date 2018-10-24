@@ -127,7 +127,7 @@ void vPotTask(void  *pvParameters)
 		value = total_value/samples;
 		total_value = 0;
 		xQueueSend(xQueuePot, &value, (portTickType) 5);
-		vTaskDelayUntil(&lastAwakened, (portTickType) 15);
+		
 	}
 }
 void vTempTask(void *pvParameters)
@@ -148,7 +148,6 @@ void vTempTask(void *pvParameters)
 		value = total_value/samples;
 		total_value = 0;
 		xQueueSend(xQueueTemp, &value, (portTickType) 20);
-		//vTaskDelayUntil(&lastAwakened, (portTickType) 20);
 	}
 }
 void vLSTask(void *pvParameters)
@@ -169,6 +168,6 @@ void vLSTask(void *pvParameters)
 		value = total_value/samples;
 		total_value = 0;
 		xQueueSend(xQueueLS, &value, (portTickType) 10);
-		vTaskDelayUntil(&lastAwakened, (portTickType) 10);
+		
 	}
 }
