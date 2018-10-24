@@ -68,30 +68,44 @@ void vDisplayTask(void)
 	
 	while(1)
 	{
-		xQueueReceive(xQueuePot, &PotValue, (portTickType) 5);
-		xQueueReceive(xQueueTemp, &TempValue, (portTickType) 20);
-		xQueueReceive(xQueueLS, &LSValue, (portTickType) 10);
+		if (uxQueueMessagesWaiting( xQueuePot ) > 0)
+		{
+			xQueueReceive(xQueuePot, &PotValue, (portTickType) 5);
+			
+			sprintf(pot, "%d", PotValue);
+			dip204_set_cursor_position(6, 2);
+			dip204_write_string("    ");
+			dip204_set_cursor_position(6, 2);
+			dip204_write_string(pot);
+		}
 		
-		sprintf(pot, "%d", PotValue);
-		sprintf(temp, "%d", TempValue);
-		sprintf(LS, "%d", LSValue);
+		if (uxQueueMessagesWaiting( xQueueTemp ) > 0)
+			{
+			xQueueReceive(xQueueTemp, &TempValue, (portTickType) 20);
+		
+			sprintf(temp, "%d", TempValue);
+			dip204_set_cursor_position(6, 3);
+			dip204_write_string("    ");
+			dip204_set_cursor_position(6, 3);
+			dip204_write_string(temp);
+			}
+		
+		if (uxQueueMessagesWaiting( xQueueLS ) > 0)
+			{
+				xQueueReceive(xQueueLS, &LSValue, (portTickType) 10);
+				
+				sprintf(LS, "%d", LSValue);
+				dip204_set_cursor_position(6, 4);
+				dip204_write_string("    ");
+				dip204_set_cursor_position(6, 4);
+				dip204_write_string(LS);
+			}
+		
+		
+		
 		sprintf(counter, "ctr: %d", k);
-		
-		dip204_set_cursor_position(6, 2);
-		dip204_write_string("    ");
-		dip204_set_cursor_position(6, 3);
-		dip204_write_string("    ");
-		dip204_set_cursor_position(6, 4);
-		dip204_write_string("    ");
-		dip204_set_cursor_position(6, 2);
-		dip204_write_string(pot);
-		dip204_set_cursor_position(6, 3);
-		dip204_write_string(temp);
-		dip204_set_cursor_position(6, 4);
-		dip204_write_string(LS);
 		dip204_set_cursor_position(12, 2);
 		dip204_write_string(counter);
-		
 		k++;
 	}
 }
