@@ -54,6 +54,7 @@ void vDisplayTask(void)
 	char pot[8];
 	char temp[8];
 	char LS[8];
+	char USART_buffer[32];
 	int k = 0;
 	
 	dip204_set_cursor_position(1,1);
@@ -108,6 +109,8 @@ void vDisplayTask(void)
 			dip204_set_cursor_position(6, 4);
 			dip204_write_string(LS);
 		}
+		sprintf(USART_buffer, "\033[2J\033cPot: %d\n Tmp: %d\n LS: %2d", pot, temp, LS);
+		usart_write_line(USART_buffer);
 		k++;
 	}
 }
