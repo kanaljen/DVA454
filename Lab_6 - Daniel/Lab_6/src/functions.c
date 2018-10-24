@@ -53,32 +53,22 @@ void usart_init(void)
 }
 void vQueueTASK(void)
 {
-	struct Message *msg;
+	struct Message msg;
 	char pot[16];
 	char tmp[16];
 	char ldr[16];
 	char buffer[32];
 	
-	
-	signed portBASE_TYPE ret;
-	
 	while(1)
 	{
-		taskENTER_CRITICAL();
-		usart_write_line(configDBG_USART , "TEST1\n");
-		taskEXIT_CRITICAL();
-		
-		if(xQueue != NULL) usart_write_line(configDBG_USART, "NULL \n");
-		else usart_write_line(configDBG_USART, "NOT NULL!! \n");
-		
 		if (uxQueueMessagesWaiting( xQueue ) > 0)
 		{
-			usart_write_line(configDBG_USART, "IM HERE!! \n");
+			
 			xQueueReceive(xQueue, &msg, (portTickType) 10);
 			
-			if(msg->pot != 0)
+			if(msg.pot != 0)
 			{
-				sprintf(pot, "%d", msg->pot);
+				sprintf(pot, "%d", msg.pot);
 				dip204_set_cursor_position(6, 1);
 				dip204_write_string("    ");
 				dip204_set_cursor_position(6, 1);
@@ -87,9 +77,9 @@ void vQueueTASK(void)
 			
 			xQueueReceive(xQueue, &msg, (portTickType) 10);
 			
-			if(msg->pot != 0)
+			if(msg.pot != 0)
 			{
-				sprintf(tmp, "%d", msg->tmp);
+				sprintf(tmp, "%d", msg.tmp);
 				dip204_set_cursor_position(6, 2);
 				dip204_write_string("    ");
 				dip204_set_cursor_position(6, 2);
@@ -98,9 +88,9 @@ void vQueueTASK(void)
 		
 			xQueueReceive(xQueue, &msg, (portTickType) 10);
 			
-			if(msg->pot != 0)
+			if(msg.pot != 0)
 			{
-				sprintf(ldr, "%d", msg->ldr);
+				sprintf(ldr, "%d", msg.ldr);
 				dip204_set_cursor_position(6, 3);
 				dip204_write_string("    ");
 				dip204_set_cursor_position(6, 3);
@@ -110,32 +100,27 @@ void vQueueTASK(void)
 			sprintf(buffer, "\033[2J\033cPot: %s Tmp: %s Ldr: %s", pot, tmp, ldr);
 			usart_write_line(configDBG_USART ,buffer);
 		}
-		else usart_write_line(configDBG_USART, "Queue EMTPTY\n");
 		
 	}
 }
 void vPotTASK(void)
 {
 	int i, pot_average;
-	struct Message *pot_value;
-	pot_value->ldr = 0;
-	pot_value->tmp = 0;
+	struct Message pot_value;
+	pot_value.ldr = 0;
+	pot_value.tmp = 0;
 	
 	while(1)
 	{
-		taskENTER_CRITICAL();
-		usart_write_line(configDBG_USART , "TEST2\n");
-		taskEXIT_CRITICAL();
 		for(i = 1; i <= 50; i++) // Collecting 50 samples
 		{
 			adc_start(&AVR32_ADC);
-			pot_value->pot = adc_get_value(&AVR32_ADC, ADC_POTENTIOMETER_CHANNEL); //Read potentiometer value
-			pot_average = pot_average + pot_value->pot;
-			usart_write_line(configDBG_USART , "TEST\n");
+			pot_value.pot = adc_get_value(&AVR32_ADC, ADC_POTENTIOMETER_CHANNEL); //Read potentiometer value
+			pot_average = pot_average + pot_value.pot;
 		}
 		
 		pot_average = pot_average / i;
-		pot_value->pot = pot_average;
+		pot_value.pot = pot_average;
 		pot_average=0;
 		
 		xQueueSend(xQueue, &pot_value, (portTickType) 10);
@@ -144,25 +129,21 @@ void vPotTASK(void)
 void vTmpTASK(void)
 {
 	int i, tmp_average;
-	struct Message *tmp_value;
-	tmp_value->ldr = 0;
-	tmp_value->pot = 0;
+	struct Message tmp_value;
+	tmp_value.ldr = 0;
+	tmp_value.pot = 0;
 	
 	while(1)
 	{
-		taskENTER_CRITICAL();
-		usart_write_line(configDBG_USART , "TEST3\n");
-		taskEXIT_CRITICAL();
 		for(i = 1; i <= 50; i++) // Collecting 50 samples
 		{
 			adc_start(&AVR32_ADC);
-			tmp_value->tmp = adc_get_value(&AVR32_ADC, ADC_TEMPERATURE_CHANNEL); //Read potentiometer value
-			tmp_average = tmp_average + tmp_value->tmp;
-			usart_write_line(configDBG_USART , "TEST\n");
+			tmp_value.tmp = adc_get_value(&AVR32_ADC, ADC_TEMPERATURE_CHANNEL); //Read potentiometer value
+			tmp_average = tmp_average + tmp_value.tmp;
 		}
 		
 		tmp_average = tmp_average / i;
-		tmp_value->tmp = tmp_average;
+		tmp_value.tmp = tmp_average;
 		tmp_average=0;
 		
 		xQueueSend(xQueue, &tmp_value, (portTickType) 10);
@@ -171,26 +152,21 @@ void vTmpTASK(void)
 void vLdrTASK(void) 
 {
 	int i, ldr_average;
-	struct Message *ldr_value;
-	ldr_value->pot = 0;
-	ldr_value->tmp = 0;
+	struct Message ldr_value;
+	ldr_value.ldr = 0;
+	ldr_value.tmp = 0;
 	
 	while(1)
 	{
-		taskENTER_CRITICAL();
-		usart_write_line(configDBG_USART , "TEST3\n");
-		taskEXIT_CRITICAL();
-		
 		for(i = 1; i <= 50; i++) // Collecting 50 samples
 		{
 			adc_start(&AVR32_ADC);
-			ldr_value->ldr = adc_get_value(&AVR32_ADC, ADC_LIGHT_CHANNEL); //Read potentiometer value
-			ldr_average = ldr_average + ldr_value->ldr;
-			usart_write_line(configDBG_USART , "TEST\n");
+			ldr_value.ldr = adc_get_value(&AVR32_ADC, ADC_LIGHT_CHANNEL); //Read potentiometer value
+			ldr_average = ldr_average + ldr_value.ldr;
 		}
 		
 		ldr_average = ldr_average / i;
-		ldr_value->ldr = ldr_average;
+		ldr_value.ldr = ldr_average;
 		ldr_average=0;
 		
 		xQueueSend(xQueue, &ldr_value, (portTickType) 10);
