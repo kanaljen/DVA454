@@ -9,5 +9,6 @@ void USART_init(volatile avr32_usart_t * usart);
 char USART_getChar();
 void USART_putChar(char c);
 void USART_reset(volatile avr32_usart_t * usart);
+void USART_putNumber(int num);
 
 #endif /* FUNCTIONS_H_ */

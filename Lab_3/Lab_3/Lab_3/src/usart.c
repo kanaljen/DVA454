@@ -84,3 +84,8 @@ void USART_reset(volatile avr32_usart_t *usart)
 	usart->CR.txen = 1;    // DO enable Transmitter
 
 }
+
+void USART_putNumber(int num){
+	USART_putChar('0'+(num/10));
+	USART_putChar('0'+(num%10));
+}

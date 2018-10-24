@@ -10,7 +10,7 @@
 #define TRUE 1
 #define FALSE 0
 #define TC_CHANNEL 0
-#define CLK_FRQ 14400 // fPBA / 8 (TC_CLOCK_SOURCE_TC3)
+#define CLK_FRQ 14400 // fPBA / 8 (TC_CLOCK_SOURCE_TC3), fPBA = 115200
 
 extern int interupts;			// Global variable
 
@@ -29,6 +29,14 @@ static tc_waveform_opt_t waveform_opt =
 	. tcclks = TC_CLOCK_SOURCE_TC3 // Internal clock source 3, connected to fPBA / 8.
 };
 
+struct time_struct // Struct to keep time
+{
+	int hours;
+	int minutes;
+	int seconds;
+	int decisecond;
+};
+
 // Define which timer signals that will cause interrupts
 static const tc_interrupt_t tc_interupt_opt =
 {
@@ -37,6 +45,7 @@ static const tc_interrupt_t tc_interupt_opt =
 
 // Define functions
 __attribute__((__interrupt__))static void tc_irq_handler(void); // Interrupt-handler, add 1 to int interupts each interrupt
-void TC_init(volatile avr32_tc_t * tc, int time_d); // Initiate TC0 with RC set to 115200 Hz/8/time_d
+void TC_init(volatile avr32_tc_t * tc); // Initiate TC0 with RC set to 115200 Hz/8/time_d
+void send_time(struct time_struct stopwatch);
 
 #endif /* FUNCTIONS_H_ */

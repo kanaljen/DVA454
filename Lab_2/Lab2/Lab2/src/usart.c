@@ -27,7 +27,7 @@ void USART_init(volatile avr32_usart_t * usart)
 	
 	// Calculate Clock Divider
 	usart->BRGR.fp = 0;                 // No fraction
-	int CD = 12000000/(8*9600*(2-0));   // Calculate
+	int CD = 12000000/(8*9600*(2-0));   // Calculate, 
 	usart->BRGR.cd = CD; 
 	 
 	// Prepare Holding Register
@@ -37,15 +37,14 @@ void USART_init(volatile avr32_usart_t * usart)
 	volatile avr32_gpio_port_t *gpio = &AVR32_GPIO.port[0]; 
 	
 	// Select function for RXD
-
 	gpio->pmr0c = 1 << USART_RXD_PIN;	// Peripheral MUX register
 	gpio->pmr1c = 1 << USART_RXD_PIN;	// 00 set USART1 - RXD
-	gpio->gperc = 1 << USART_RXD_PIN;	// GPIO Enable Register
+	gpio->gperc = 1 << USART_RXD_PIN;	// GPIO Enable Register, cleared to enable Peripheral
 	
 	// Select function for TXD
 	gpio->pmr0c = 1 << USART_TXD_PIN;	// Peripheral MUX register
 	gpio->pmr1c = 1 << USART_TXD_PIN;	// 00 set USART1 - TXD
-	gpio->gperc = 1 << USART_TXD_PIN;	// GPIO Enable Register
+	gpio->gperc = 1 << USART_TXD_PIN;	// GPIO Enable Register, cleared to enable Peripheral
 	
 }
 
