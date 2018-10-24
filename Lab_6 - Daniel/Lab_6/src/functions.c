@@ -57,6 +57,7 @@ void vQueueTASK(void)
 	char pot[16];
 	char tmp[16];
 	char ldr[16];
+	char buffer[32];
 	
 	
 	signed portBASE_TYPE ret;
@@ -105,6 +106,9 @@ void vQueueTASK(void)
 				dip204_set_cursor_position(6, 3);
 				dip204_write_string(ldr);
 			}
+			
+			sprintf(buffer, "\033[2J\033cPot: %s Tmp: %s Ldr: %s", pot, tmp, ldr);
+			usart_write_line(configDBG_USART ,buffer);
 		}
 		else usart_write_line(configDBG_USART, "Queue EMTPTY\n");
 		
