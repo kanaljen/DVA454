@@ -1,14 +1,7 @@
 #include "functions.h"
 
-int buffer[buffer_size];
-int itemCount = 0;
+#define sample_size 10
 xQueueHandle xQueueTemp, xQueuePot, xQueueLS;
-
-/*struct msg
-{
-	int value;
-	portTickType timestamp;	
-};*/
 
 void usart_init(void)
 {
@@ -57,7 +50,7 @@ void vDisplayTask(void)
 	/* This task communicates with sensor input task and display
 	   the values it gets from those with the help of msg queues */
 	
-	int PotMsg, TempMsg, LSMsg;
+	int PotValue = 0, TempValue = 0, LSValue = 0;
 	char pot[8];
 	char temp[8];
 	char LS[8];
@@ -75,15 +68,21 @@ void vDisplayTask(void)
 	
 	while(1)
 	{
-		xQueueReceive(xQueuePot, &PotMsg, (portTickType) 10);
-		xQueueReceive(xQueueTemp, &TempMsg, (portTickType) 10);
-		xQueueReceive(xQueueLS, &LSMsg, (portTickType) 10);
+		xQueueReceive(xQueuePot, &PotValue, (portTickType) 5);
+		xQueueReceive(xQueueTemp, &TempValue, (portTickType) 20);
+		xQueueReceive(xQueueLS, &LSValue, (portTickType) 10);
 		
-		sprintf(pot, "%d", PotMsg);
-		sprintf(temp, "%d", TempMsg);
-		sprintf(LS, "%d", LSMsg);
+		sprintf(pot, "%d", PotValue);
+		sprintf(temp, "%d", TempValue);
+		sprintf(LS, "%d", LSValue);
 		sprintf(counter, "ctr: %d", k);
 		
+		dip204_set_cursor_position(6, 2);
+		dip204_write_string("    ");
+		dip204_set_cursor_position(6, 3);
+		dip204_write_string("    ");
+		dip204_set_cursor_position(6, 4);
+		dip204_write_string("    ");
 		dip204_set_cursor_position(6, 2);
 		dip204_write_string(pot);
 		dip204_set_cursor_position(6, 3);
@@ -98,34 +97,64 @@ void vDisplayTask(void)
 }
 void vPotTask(void  *pvParameters)
 {
-	int msg; 
+	int value, i;
+	int total_value = 0;
+	int samples = sample_size;
+	portTickType lastAwakened = xTaskGetTickCount();
 	
 	while(1)
 	{
-		msg = adc_get_value(&AVR32_ADC, ADC_POTENTIOMETER_CHANNEL); //Read potentiometer value
-		//message.timestamp = xTaskGetTickCount();
-		xQueueSend(xQueuePot, &msg, (portTickType) 10);
+		for(i = 0; i < samples; i++)
+		{
+			adc_start(&AVR32_ADC);
+			value = adc_get_value(&AVR32_ADC, ADC_POTENTIOMETER_CHANNEL); //Read potentiometer value
+			total_value = total_value + value;
+		}
+		value = total_value/samples;
+		total_value = 0;
+		xQueueSend(xQueuePot, &value, (portTickType) 5);
+		vTaskDelayUntil(&lastAwakened, (portTickType) 15);
 	}
 }
 void vTempTask(void *pvParameters)
 {
-	int msg;
+	int value, i;
+	int total_value = 0;
+	int samples = sample_size;
+	portTickType lastAwakened = xTaskGetTickCount();
 	
 	while(1)
 	{
-		msg = adc_get_value(&AVR32_ADC, ADC_TEMPERATURE_CHANNEL); //Read potentiometer value
-		//message.timestamp = xTaskGetTickCount();
-		xQueueSend(xQueuePot, &msg, (portTickType) 10);
+		for(i = 0; i < samples; i++)
+		{
+			adc_start(&AVR32_ADC);
+			value = adc_get_value(&AVR32_ADC, ADC_TEMPERATURE_CHANNEL); //Read potentiometer value
+			total_value = total_value + value;
+		}
+		value = total_value/samples;
+		total_value = 0;
+		xQueueSend(xQueueTemp, &value, (portTickType) 20);
+		//vTaskDelayUntil(&lastAwakened, (portTickType) 20);
 	}
 }
 void vLSTask(void *pvParameters)
 {
-	int msg;
+	int value, i;
+	int total_value = 0;
+	int samples = sample_size;
+	portTickType lastAwakened = xTaskGetTickCount();
 	
 	while(1)
 	{
-		msg = adc_get_value(&AVR32_ADC, ADC_LIGHT_CHANNEL); //Read potentiometer value
-		//message.timestamp = xTaskGetTickCount();
-		xQueueSend(xQueuePot, &msg, (portTickType) 10);
+		for(i = 0; i < samples; i++)
+		{
+			adc_start(&AVR32_ADC);
+			value = adc_get_value(&AVR32_ADC, ADC_LIGHT_CHANNEL); //Read potentiometer value
+			total_value = total_value + value;
+		}
+		value = total_value/samples;
+		total_value = 0;
+		xQueueSend(xQueueLS, &value, (portTickType) 10);
+		vTaskDelayUntil(&lastAwakened, (portTickType) 10);
 	}
 }
