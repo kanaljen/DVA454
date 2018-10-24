@@ -98,6 +98,7 @@ void vConsumerTask(void* pvParameters)
 	{
 		if(itemCount == 0)
 		{
+			for(int i = 0; i < 100; i++);
 			taskENTER_CRITICAL();
 			usart_write_line(configDBG_USART, "Consumer Sleeping\n");
 			taskEXIT_CRITICAL();
