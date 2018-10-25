@@ -275,6 +275,18 @@
     <Folder Include="src\config\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\led.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\led.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\pwm.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\pwm.h">
+      <SubType>compile</SubType>
+    </Compile>
     <None Include="src\asf.h">
       <SubType>compile</SubType>
     </None>
