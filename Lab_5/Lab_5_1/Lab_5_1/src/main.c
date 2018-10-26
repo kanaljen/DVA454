@@ -9,12 +9,17 @@
 
 int main (void){
 	
+	USART_init();
+	LED_init();
+
+/*
 	xTaskCreate(
-	vTaskCode,       /* Function that implements the task. */
-	"NAME",          /* Text name for the task. */
-	STACK_SIZE,      /* Stack size in words, not bytes. */
-	( void * ) 1,    /* Parameter passed into the task. */
-	tskIDLE_PRIORITY,/* Priority at which the task is created. */
-	&xHandle );      /* Used to pass out the created task's handle. */
+	vTaskCode,       
+	"NAME",         
+	STACK_SIZE,     
+	( void * ) 1,    
+	tskIDLE_PRIORITY,
+	&xHandle );      
+*/
 
 }

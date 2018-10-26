@@ -14,8 +14,7 @@
 #include "board.h"
 #include "compiler.h"
 
-// Initialize USART
-void init_usart ( void )
+void USART_init(void)
 {
 	static const gpio_map_t USART_SERIAL_GPIO_MAP =
 	{
@@ -40,8 +39,29 @@ void init_usart ( void )
 	gpio_enable_module ( USART_DEBUG_GPIO_MAP , 2);
 	usart_init_rs232 ( serialPORT_USART , & USART_OPTIONS , FOSC0 );
 	usart_init_rs232 ( configDBG_USART , & USART_OPTIONS , FOSC0 );
+	
+	usart_write_line(configDBG_USART , "USART Initialized\n");
 }
 
+void LED_init(void)
+{
+	volatile avr32_gpio_port_t * led0_port = &AVR32_GPIO.port[LED0_PORT];
+	led0_port->gpers = LED0_BIT_VALUE; //Set Enable register
+	led0_port->ovrs = LED0_BIT_VALUE; //Set output value register
+	led0_port->oders = LED0_BIT_VALUE; //Set output drive register
+	
+	volatile avr32_gpio_port_t * led1_port = &AVR32_GPIO.port[LED1_PORT];
+	led1_port->gpers = LED1_BIT_VALUE; //Set Enable register
+	led1_port->ovrs = LED1_BIT_VALUE; //Set output value register
+	led1_port->oders = LED1_BIT_VALUE; //Set output drive register
+	
+	volatile avr32_gpio_port_t * led2_port = &AVR32_GPIO.port[LED2_PORT];
+	led2_port->gpers = LED2_BIT_VALUE; //Set Enable register
+	led2_port->ovrs = LED2_BIT_VALUE; //Set output value register
+	led2_port->oders = LED2_BIT_VALUE; //Set output drive register
+	
+	usart_write_line(configDBG_USART , "LEDS Initialized\n");
+}
 
 void vBlinkLED0( void * pvParameters )
 {
