@@ -57,6 +57,8 @@ void vDisplayTask(void)
 	char USART_buffer[32];
 	int k = 0;
 	
+	/* Initial print to LCD */
+	
 	dip204_set_cursor_position(1,1);
 	dip204_write_string("Sensors Monitor 2000");
 	dip204_set_cursor_position(1,2);
@@ -68,9 +70,15 @@ void vDisplayTask(void)
 	
 	while(1)
 	{
-		if (uxQueueMessagesWaiting( xQueuePot ) > 0)
+		/* For each queue, check if there is a message waiting
+		   if so, wait to receive the message then print it. 
+		   Each 10 times it will clear the space so nothing old is left */
+		
+		if (uxQueueMessagesWaiting( xQueuePot ) > 0) //Check if there is a message
 		{
-			xQueueReceive(xQueuePot, &PotValue, (portTickType) 5);
+			xQueueReceive(xQueuePot, &PotValue, (portTickType) 5); //Receive the message
+			
+			/* Print the message and reset screen each 10 time */
 			
 			sprintf(pot, "%d", PotValue);
 			if(k % 10)
@@ -81,6 +89,8 @@ void vDisplayTask(void)
 			dip204_set_cursor_position(6, 2);
 			dip204_write_string(pot);
 		}
+		
+		/* Repeat above for rest of the sensors and queues */
 		
 		if (uxQueueMessagesWaiting( xQueueTemp ) > 0)
 		{
@@ -110,6 +120,7 @@ void vDisplayTask(void)
 			dip204_write_string(LS);
 		}
 		
+		/* Prints the message to the serial monitor, must use external that can handle ANSII */
 		
 		sprintf(USART_buffer, "\033[2J\033cPot: %d Tmp: %d LS: %d", PotValue, TempValue, LSValue);
 		usart_write_line(configDBG_USART, USART_buffer);
@@ -119,10 +130,14 @@ void vDisplayTask(void)
 }
 void vPotTask(void  *pvParameters)
 {
+	/* PotTask, TempTask and LSTask work similarly, only different ADC channels.
+	
+	   The task takes X samples from the sensor and averages this, the average value is sent 
+	   to the corresponding queue	*/
+	
 	int value, i;
 	int total_value = 0;
 	int samples = sample_size;
-	portTickType lastAwakened = xTaskGetTickCount();
 	
 	while(1)
 	{
@@ -130,8 +145,11 @@ void vPotTask(void  *pvParameters)
 		{
 			adc_start(&AVR32_ADC);
 			value = adc_get_value(&AVR32_ADC, ADC_POTENTIOMETER_CHANNEL); //Read potentiometer value
-			total_value = total_value + value;
+			total_value = total_value + value;                            //Add to total for X samples
 		}
+		
+		/* Compute the average and put it in corresponding queue */
+		
 		value = total_value/samples;
 		total_value = 0;
 		xQueueSend(xQueuePot, &value, (portTickType) 5);
@@ -143,14 +161,13 @@ void vTempTask(void *pvParameters)
 	int value, i;
 	int total_value = 0;
 	int samples = sample_size;
-	portTickType lastAwakened = xTaskGetTickCount();
 	
 	while(1)
 	{
 		for(i = 0; i < samples; i++)
 		{
 			adc_start(&AVR32_ADC);
-			value = adc_get_value(&AVR32_ADC, ADC_TEMPERATURE_CHANNEL); //Read potentiometer value
+			value = adc_get_value(&AVR32_ADC, ADC_TEMPERATURE_CHANNEL); //Read temperature value
 			total_value = total_value + value;
 		}
 		value = total_value/samples;
@@ -163,14 +180,13 @@ void vLSTask(void *pvParameters)
 	int value, i;
 	int total_value = 0;
 	int samples = sample_size;
-	portTickType lastAwakened = xTaskGetTickCount();
 	
 	while(1)
 	{
 		for(i = 0; i < samples; i++)
 		{
 			adc_start(&AVR32_ADC);
-			value = adc_get_value(&AVR32_ADC, ADC_LIGHT_CHANNEL); //Read potentiometer value
+			value = adc_get_value(&AVR32_ADC, ADC_LIGHT_CHANNEL); //Read light sensor value
 			total_value = total_value + value;
 		}
 		value = total_value/samples;
