@@ -9,27 +9,27 @@
 
 void LED_init(void)
 {
-	/* Select the pin we are going to use as GPIO */
-	GPIO_PORT1_GPERS = (1 << 27);
-	/* Set the value of that pin to HIGH */
-	GPIO_PORT1_OVRS = (1 << 27);
-	/* Enable the corresponding driver for that pin */
-	GPIO_PORT1_ODERS = (1 << 27);
+	/* Enable pin */
+	GPIO1_GPERS = (1 << LED_PIN); // GPIO Enable, page 178
+	/* Pin is an OUTPUT */
+	GPIO1_ODERS = (1 << LED_PIN); // Output Driver Enable Register, page 180
+	/* Set pin 27 */
+	GPIO1_OVRS = (1 << LED_PIN);  // Output Value Register, page 181
 	
 }
 
-void LED_set(uint8_t value)
+void LED_set(int bool)
 {
-	if(value != 0)
+	if(bool == TRUE)
 	{
-		/* Set the value on the LED0 pin to HIGH */
-		GPIO_PORT1_OVRC = (0x01 << 27);
+
+		GPIO1_OVRC = (0x01 << LED_PIN);  // LED ON
 	}
 	else
 	{
-		/* Set the value on the LED0 pin to LOW */
-		GPIO_PORT1_OVRS = (0x01 << 27);
+		GPIO1_OVRS = (0x01 << LED_PIN);  // LED OFF
 	}
+
 }
 
 
