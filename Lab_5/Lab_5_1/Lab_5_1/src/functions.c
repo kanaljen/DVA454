@@ -49,40 +49,63 @@ void LED_init(void)
 	led0_port->gpers = LED0_BIT_VALUE; //Set Enable register
 	led0_port->ovrs = LED0_BIT_VALUE; //Set output value register
 	led0_port->oders = LED0_BIT_VALUE; //Set output drive register
+	usart_write_line(configDBG_USART , "LED 0 Initialized\n");
 	
 	volatile avr32_gpio_port_t * led1_port = &AVR32_GPIO.port[LED1_PORT];
 	led1_port->gpers = LED1_BIT_VALUE; //Set Enable register
 	led1_port->ovrs = LED1_BIT_VALUE; //Set output value register
 	led1_port->oders = LED1_BIT_VALUE; //Set output drive register
+	usart_write_line(configDBG_USART , "LED 1 Initialized\n");
 	
 	volatile avr32_gpio_port_t * led2_port = &AVR32_GPIO.port[LED2_PORT];
 	led2_port->gpers = LED2_BIT_VALUE; //Set Enable register
 	led2_port->ovrs = LED2_BIT_VALUE; //Set output value register
 	led2_port->oders = LED2_BIT_VALUE; //Set output drive register
+	usart_write_line(configDBG_USART , "LED 2 Initialized\n");
 	
-	usart_write_line(configDBG_USART , "LEDS Initialized\n");
+	usart_write_line(configDBG_USART , "All LED:s Initialized\n");
+	
 }
 
 void vBlinkLED0( void * pvParameters )
 {
+	portTickType xLastWakeTime;
+	const portTickType xFrequency = 1000;
+	xLastWakeTime = xTaskGetTickCount();
+	volatile avr32_gpio_port_t * led0_port = &AVR32_GPIO.port[LED0_PORT];
+	
     for( ;; )
     {
-        /* Task code goes here. */
+		xLastWakeTime = xTaskGetTickCount();
+		vTaskDelayUntil(&xLastWakeTime, xFrequency);
+        led0_port->ovrt = LED0_BIT_VALUE;
     }
 }
 
 void vBlinkLED1( void * pvParameters )
 {
+	portTickType xLastWakeTime;
+	const portTickType xFrequency = 2000;
+	xLastWakeTime = xTaskGetTickCount();
+	volatile avr32_gpio_port_t * led1_port = &AVR32_GPIO.port[LED1_PORT];
 	for( ;; )
 	{
-		/* Task code goes here. */
+		xLastWakeTime = xTaskGetTickCount();
+		vTaskDelayUntil(&xLastWakeTime, xFrequency);
+		led1_port->ovrt = LED1_BIT_VALUE;
 	}
 }
 
 void vBlinkLED2( void * pvParameters )
 {
+	portTickType xLastWakeTime;
+	const portTickType xFrequency = 3000;
+	xLastWakeTime = xTaskGetTickCount();
+	volatile avr32_gpio_port_t * led2_port = &AVR32_GPIO.port[LED2_PORT];
 	for( ;; )
 	{
-		/* Task code goes here. */
+		xLastWakeTime = xTaskGetTickCount();
+		vTaskDelayUntil(&xLastWakeTime, xFrequency);
+		led2_port->ovrt = LED2_BIT_VALUE;
 	}
 }

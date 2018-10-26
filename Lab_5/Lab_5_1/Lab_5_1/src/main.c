@@ -9,17 +9,19 @@
 
 int main (void){
 	
+	// Init functions
 	USART_init();
 	LED_init();
-
-/*
-	xTaskCreate(
-	vTaskCode,       
-	"NAME",         
-	STACK_SIZE,     
-	( void * ) 1,    
-	tskIDLE_PRIORITY,
-	&xHandle );      
-*/
+	
+	// Create tasks
+	xTaskCreate(vBlinkLED0,"LED0TASK",STACK_SIZE,NULL,1,NULL);
+	xTaskCreate(vBlinkLED1,"LED0TASK",STACK_SIZE,NULL,1,NULL);
+	xTaskCreate(vBlinkLED2,"LED0TASK",STACK_SIZE,NULL,1,NULL);
+	
+	// Start Scheduler       
+	vTaskStartScheduler();
+	
+	// Keep main alive!
+	while(TRUE);
 
 }

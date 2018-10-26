@@ -16,8 +16,9 @@
 #include "board.h"
 #include "compiler.h"
 
+#define TRUE 1
+#define FALSE 0
 #define STACK_SIZE configMINIMAL_STACK_SIZE
-
 #define GPIO_MAX_PIN_NUMBER 32
 
 //Define LED 0
