@@ -70,7 +70,7 @@ void LED_init(void)
 void vBlinkLED0( void * pvParameters )
 {
 	volatile avr32_gpio_port_t * led0_port = &AVR32_GPIO.port[LED0_PORT];
-    for( ;; )
+    while(TRUE)
     {
 		vTaskDelay(1000);
         led0_port->ovrt = LED0_BIT_VALUE;
@@ -79,49 +79,60 @@ void vBlinkLED0( void * pvParameters )
 
 void vBlinkLED1( void * pvParameters )
 {
-	portTickType xLastWakeTime;
-	const portTickType xFrequency = 2000;
-	xLastWakeTime = xTaskGetTickCount();
 	volatile avr32_gpio_port_t * led1_port = &AVR32_GPIO.port[LED1_PORT];
-	for( ;; )
-	{
-
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
-		led1_port->ovrt = LED1_BIT_VALUE;
-	}
+    while(TRUE)
+    {
+	    vTaskDelay(2000);
+	    led1_port->ovrt = LED1_BIT_VALUE;
+    }
 }
 
 void vBlinkLED2( void * pvParameters )
 {
-	portTickType xLastWakeTime;
-	const portTickType xFrequency = 3000;
-	xLastWakeTime = xTaskGetTickCount();
 	volatile avr32_gpio_port_t * led2_port = &AVR32_GPIO.port[LED2_PORT];
-	for( ;; )
-	{
-		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
-		led2_port->ovrt = LED2_BIT_VALUE;
-	}
+    while(TRUE)
+    {
+	    vTaskDelay(3000);
+	    led2_port->ovrt = LED2_BIT_VALUE;
+    }
 }
 
 void vButtons( void * pvParameters ){
 	
 	int state[3] = {1,1,1};
-	int port[3] = {BUTTON_PORT0,BUTTON_PORT1,BUTTON_PORT2};
-	int pin[3] = {BUTTON_PIN0,BUTTON_PIN1,BUTTON_PIN2};
+	const int bport[3] = {BUTTON_PORT0,BUTTON_PORT1,BUTTON_PORT2};
+	const int bpin[3] = {BUTTON_PIN0,BUTTON_PIN1,BUTTON_PIN2};
+	const int lport[3] = {LED0_PORT,LED1_PORT,LED2_PORT};
+	const int lbit[3] = {LED0_BIT_VALUE,LED1_BIT_VALUE,LED2_BIT_VALUE};
 	xTaskHandle* task = pvParameters;
+	xTaskHandle* subTask = malloc(sizeof(xTaskHandle*)*3);
+	xTaskCreate(vLEDON,"subTask0",STACK_SIZE,&(task[0]),1,&(subTask[0]));
+	xTaskCreate(vLEDON,"subTask1",STACK_SIZE,&(task[1]),1,&(subTask[1]));
+	xTaskCreate(vLEDON,"subTask2",STACK_SIZE,&(task[2]),1,&(subTask[2]));
 	
 
 	while (TRUE)
 	{
-		for(int i=0;i < 3;i++){
-			state[i] = AVR32_GPIO.port[port[i]].pvr & pin[i];
+		for(int i=0;i<3;i++){
+			state[i] = AVR32_GPIO.port[bport[i]].pvr & bpin[i]; 
 			if(!state[i]){
-				vTaskSuspend(task[i]); //Suspend the task with the same LED with its handle
+				volatile avr32_gpio_port_t * led = &AVR32_GPIO.port[lport[i]];
+				led->ovrc = lbit[i];
+				vTaskResume(subTask[i]);
 			}
 		}
 	}
 	
+
+}
+
+void vLEDON( void * pvParameters){
+	xTaskHandle task  = *(xTaskHandle *)pvParameters;
+	while(TRUE){
+		vTaskSuspend(NULL);
+		vTaskSuspend(task);
+		vTaskDelay(5000);
+		vTaskResume(task);
+	}
 
 }
