@@ -14,16 +14,17 @@ int main (void){
 	LED_init();
 	
 	// Task Handles
-	xTaskHandle *blinker = malloc(sizeof(xTaskHandle*)*3);
+	xTaskHandle *hndBlinker = malloc(sizeof(xTaskHandle*)*3);
 	
-	// Task Info
-	char* tskNames = {"tskBlinking0","tskBlinking1","tskBlinking2"};
-	int led[3] = {0,1,2};
+	// Create semaphore
+	xSemaphoreHandle *hndSem = malloc(sizeof(xSemaphoreHandle*));
+	vSemaphoreCreateBinary(hndSem);
 	
 	// Create tasks
-	for(int i=0;i<3;i++)xTaskCreate(tskBlinking,&tskNames[i],STACK_SIZE,&led[i],1,&(blinker[i]));
-	
-	xTaskCreate(tskButtons,"tskButtons",STACK_SIZE,blinker,1,NULL);
+	xTaskCreate(tskBlinking0,"tskBlinking0",STACK_SIZE,&hndSem,tskIDLE_PRIORITY+1,&(hndBlinker[0]));
+	xTaskCreate(tskBlinking1,"tskBlinking1",STACK_SIZE,&hndSem,tskIDLE_PRIORITY+2,&(hndBlinker[0]));
+	xTaskCreate(tskBlinking2,"tskBlinking2",STACK_SIZE,&hndSem,tskIDLE_PRIORITY+3,&(hndBlinker[0]));
+	xTaskCreate(tskButtons,"tskButtons",STACK_SIZE,hndBlinker,1,NULL);
 	
 	// Start Scheduler       
 	vTaskStartScheduler();

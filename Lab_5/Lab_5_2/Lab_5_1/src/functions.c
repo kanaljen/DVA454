@@ -52,18 +52,20 @@ void LED_init(void)
 {
 	for(int i=0;i<3;i++){
 		volatile avr32_gpio_port_t * led = &AVR32_GPIO.port[lport[i]];
-		led->gpers = lbit[i]; //Set Enable register
-		led->ovrs = lbit[i]; //Set output value register
-		led->oders = lbit[i]; //Set output drive register
+		led->gpers = lbit[i]; 
+		led->ovrs = lbit[i]; 
+		led->oders = lbit[i];
 	}	
 	vWriteLine("All LED:s Initialized\n");
 }
 
-void tskBlinking(void* ptr)
+void tskBlinking0(void* ptr)
 {
+	int index = 0;
 	portTickType xLastWakeTime;
-	const portTickType xMS = 1000; 
-	int index = *(int*)ptr;
+	const portTickType xMS = 1000;
+	xSemaphoreHandle hndSem = *(xSemaphoreHandle*)ptr;
+
 	volatile avr32_gpio_port_t * led = &AVR32_GPIO.port[lport[index]];
 
 	while(TRUE)
@@ -74,15 +76,47 @@ void tskBlinking(void* ptr)
 	}
 }
 
+void tskBlinking1(void* ptr)
+{
+	int index = 1;
+	portTickType xLastWakeTime;
+	const portTickType xMS = 2000;
+
+	volatile avr32_gpio_port_t * led = &AVR32_GPIO.port[lport[index]];
+
+	while(TRUE)
+	{
+		led->ovrt = lbit[index];
+		xLastWakeTime = xTaskGetTickCount();
+		vTaskDelayUntil(&xLastWakeTime, xMS);
+	}
+}
+
+void tskBlinking2(void* ptr)
+{
+	int index = 2;
+	portTickType xLastWakeTime;
+	const portTickType xMS = 3000;
+
+	volatile avr32_gpio_port_t * led = &AVR32_GPIO.port[lport[index]];
+
+	while(TRUE)
+	{
+		led->ovrt = lbit[index];
+		xLastWakeTime = xTaskGetTickCount();
+		vTaskDelayUntil(&xLastWakeTime, xMS);
+	}
+}
+
 void tskButtons(void* ptr){
 	
 	int state[3] = {1,1,1};
 	int pressed = FALSE;
 	xTaskHandle* task = ptr;
 	xTaskHandle* subTask = malloc(sizeof(xTaskHandle*)*3);
-	xTaskCreate(tskSubTask,"subTask0",STACK_SIZE,&(task[0]),1,&(subTask[0]));
-	xTaskCreate(tskSubTask,"subTask1",STACK_SIZE,&(task[1]),1,&(subTask[1]));
-	xTaskCreate(tskSubTask,"subTask2",STACK_SIZE,&(task[2]),1,&(subTask[2]));
+	xTaskCreate(tskSubTask,"subTask0",STACK_SIZE,&(task[0]),3,&(subTask[0]));
+	xTaskCreate(tskSubTask,"subTask1",STACK_SIZE,&(task[1]),3,&(subTask[1]));
+	xTaskCreate(tskSubTask,"subTask2",STACK_SIZE,&(task[2]),3,&(subTask[2]));
 
 	while (TRUE)
 	{
@@ -93,7 +127,7 @@ void tskButtons(void* ptr){
 				vWriteLine("Button pushed!\n");
 				while(!state[i])state[i] = AVR32_GPIO.port[bport[i]].pvr & bpin[i];
 				volatile avr32_gpio_port_t * led = &AVR32_GPIO.port[lport[i]];
-				led->ovrc = lbit[i];
+				led->ovrs = lbit[i];
 				vTaskResume(subTask[i]);
 				pressed = FALSE;
 			}

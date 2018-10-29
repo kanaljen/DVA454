@@ -60,7 +60,9 @@
 
 void USART_init(void); // Initialize USART, copied from lab spec
 void LED_init(void); // Initialize LEDS, copied from earlier assignment 
-void tskBlinking(void*ptr);
+void tskBlinking0(void* ptr);
+void tskBlinking1(void* ptr);
+void tskBlinking2(void* ptr);
 void tskButtons(void*ptr );
 void tskSubTask(void*ptr);
 void vWriteLine(char*str);
