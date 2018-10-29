@@ -64,6 +64,7 @@ void vBlinkLED0(void*); // Task function for blinking led 0
 void vBlinkLED1(void*); // Task function for blinking led 1
 void vBlinkLED2(void*); // Task function for blinking led 2
 void vButtons( void * pvParameters );
-void vLEDON( void * pvParameters);
+void vSubTask( void * pvParameters);
+void vWriteLine(char* line);
 
 #endif /* FUNCTIONS_H_ */
