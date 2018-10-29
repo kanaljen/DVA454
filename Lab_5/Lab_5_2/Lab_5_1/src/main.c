@@ -16,11 +16,14 @@ int main (void){
 	// Task Handles
 	xTaskHandle *blinker = malloc(sizeof(xTaskHandle*)*3);
 	
+	// Task Info
+	char* tskNames = {"tskBlinking0","tskBlinking1","tskBlinking2"};
+	int led[3] = {0,1,2};
+	
 	// Create tasks
-	xTaskCreate(vBlinkLED0,"LED0BLINK",STACK_SIZE,NULL,1,&(blinker[0]));
-	xTaskCreate(vBlinkLED1,"LED1BLINK",STACK_SIZE,NULL,1,&(blinker[1]));
-	xTaskCreate(vBlinkLED2,"LED2BLINK",STACK_SIZE,NULL,1,&(blinker[2]));
-	xTaskCreate(vButtons,"BUTTONS",STACK_SIZE,blinker,1,NULL);
+	for(int i=0;i<3;i++)xTaskCreate(tskBlinking,&tskNames[i],STACK_SIZE,&led[i],1,&(blinker[i]));
+	
+	xTaskCreate(tskButtons,"tskButtons",STACK_SIZE,blinker,1,NULL);
 	
 	// Start Scheduler       
 	vTaskStartScheduler();

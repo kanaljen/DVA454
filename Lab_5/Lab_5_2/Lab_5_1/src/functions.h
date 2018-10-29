@@ -60,11 +60,9 @@
 
 void USART_init(void); // Initialize USART, copied from lab spec
 void LED_init(void); // Initialize LEDS, copied from earlier assignment 
-void vBlinkLED0(void*); // Task function for blinking led 0
-void vBlinkLED1(void*); // Task function for blinking led 1
-void vBlinkLED2(void*); // Task function for blinking led 2
-void vButtons( void * pvParameters );
-void vSubTask( void * pvParameters);
-void vWriteLine(char* line);
+void tskBlinking(void*ptr);
+void tskButtons(void*ptr );
+void tskSubTask(void*ptr);
+void vWriteLine(char*str);
 
 #endif /* FUNCTIONS_H_ */
