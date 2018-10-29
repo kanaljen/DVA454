@@ -69,15 +69,10 @@ void LED_init(void)
 
 void vBlinkLED0( void * pvParameters )
 {
-	portTickType xLastWakeTime;
-	const portTickType xFrequency = 1000;
-	xLastWakeTime = xTaskGetTickCount();
 	volatile avr32_gpio_port_t * led0_port = &AVR32_GPIO.port[LED0_PORT];
-	
     for( ;; )
     {
-		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
+		vTaskDelay(1000);
         led0_port->ovrt = LED0_BIT_VALUE;
     }
 }
@@ -90,7 +85,7 @@ void vBlinkLED1( void * pvParameters )
 	volatile avr32_gpio_port_t * led1_port = &AVR32_GPIO.port[LED1_PORT];
 	for( ;; )
 	{
-		xLastWakeTime = xTaskGetTickCount();
+
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 		led1_port->ovrt = LED1_BIT_VALUE;
 	}
@@ -108,4 +103,25 @@ void vBlinkLED2( void * pvParameters )
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 		led2_port->ovrt = LED2_BIT_VALUE;
 	}
+}
+
+void vButtons( void * pvParameters ){
+	
+	int state[3] = {1,1,1};
+	int port[3] = {BUTTON_PORT0,BUTTON_PORT1,BUTTON_PORT2};
+	int pin[3] = {BUTTON_PIN0,BUTTON_PIN1,BUTTON_PIN2};
+	xTaskHandle* task = pvParameters;
+	
+
+	while (TRUE)
+	{
+		for(int i=0;i < 3;i++){
+			state[i] = AVR32_GPIO.port[port[i]].pvr & pin[i];
+			if(!state[i]){
+				vTaskSuspend(task[i]); //Suspend the task with the same LED with its handle
+			}
+		}
+	}
+	
+
 }

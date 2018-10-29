@@ -13,10 +13,14 @@ int main (void){
 	USART_init();
 	LED_init();
 	
+	// Task Handles
+	xTaskHandle *blinker = malloc(sizeof(xTaskHandle*)*3);
+	
 	// Create tasks
-	xTaskCreate(vBlinkLED0,"LED0TASK",STACK_SIZE,NULL,1,NULL);
-	xTaskCreate(vBlinkLED1,"LED0TASK",STACK_SIZE,NULL,1,NULL);
-	xTaskCreate(vBlinkLED2,"LED0TASK",STACK_SIZE,NULL,1,NULL);
+	xTaskCreate(vBlinkLED0,"LED0BLINK",STACK_SIZE,NULL,1,blinker[0]);
+	xTaskCreate(vBlinkLED1,"LED1BLINK",STACK_SIZE,NULL,1,blinker[1]);
+	xTaskCreate(vBlinkLED2,"LED2BLINK",STACK_SIZE,NULL,1,blinker[2]);
+	xTaskCreate(vButtons,"BUTTONS",STACK_SIZE,NULL,1,NULL);
 	
 	// Start Scheduler       
 	vTaskStartScheduler();
