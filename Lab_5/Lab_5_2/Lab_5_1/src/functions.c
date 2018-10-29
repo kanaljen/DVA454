@@ -70,9 +70,9 @@ void tskBlinking0(void* ptr)
 
 	while(TRUE)
 	{
-		led->ovrt = lbit[index]; 
-		xLastWakeTime = xTaskGetTickCount();
-		vTaskDelayUntil(&xLastWakeTime, xMS); 
+		led->ovrc = LED2_BIT_VALUE; //Turn on LED 2
+		vTaskDelay(1000);
+		led->ovrs = LED2_BIT_VALUE; //Turn off LED 2
 	}
 }
 
