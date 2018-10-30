@@ -15,6 +15,7 @@
 #include "pm.h"
 #include "board.h"
 #include "compiler.h"
+#include "semphr.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -22,7 +23,6 @@
 #define GPIO_MAX_PIN_NUMBER 32
 
 /* LEDS */
-
 #define LED0_PORT ( LED0_GPIO / GPIO_MAX_PIN_NUMBER )
 #define LED0_PIN ( LED0_GPIO & ( GPIO_MAX_PIN_NUMBER -1))
 #define LED0_BIT_VALUE (1 << LED0_PIN )
@@ -60,11 +60,9 @@
 
 void USART_init(void); // Initialize USART, copied from lab spec
 void LED_init(void); // Initialize LEDS, copied from earlier assignment 
-void tskBlinking0(void* ptr);
-void tskBlinking1(void* ptr);
-void tskBlinking2(void* ptr);
-void tskButtons(void*ptr );
-void tskSubTask(void*ptr);
+void tskHigh(void* ptr);
+void tskMed(void* ptr);
+void tskLow(void* ptr);
 void vWriteLine(char*str);
 
 #endif /* FUNCTIONS_H_ */
