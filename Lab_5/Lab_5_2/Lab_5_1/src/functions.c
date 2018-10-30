@@ -97,7 +97,6 @@ void tskLow(void* ptr)
 			led->ovrt = lbit[2];
 			vTaskDelay(1000);
 			xSemaphoreGive(xSemaphore);
-			vWriteLine("Give Sem Bro");
 		}
 	}
 }
