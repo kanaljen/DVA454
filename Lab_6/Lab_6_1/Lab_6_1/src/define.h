@@ -25,6 +25,7 @@
 #define FALSE 0
 #define STACK_SIZE configMINIMAL_STACK_SIZE
 #define GPIO_MAX_PIN_NUMBER 32
+#define BUFFER_SIZE 10
 
 /* LEDS */
 #define LED0_PORT ( LED0_GPIO / GPIO_MAX_PIN_NUMBER )
@@ -66,6 +67,7 @@
 void USART_init(void);
 void LED_init(void);
 void vWriteLine(char* str);
+void initSemaphore(void);
 void tskProducer(void* ptr);
 void tskConsumer(void* ptr);
 

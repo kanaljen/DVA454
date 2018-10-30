@@ -14,6 +14,7 @@ int main(void){
 	
 	USART_init();
 	LED_init();
+	initSemaphore();
 	
 	xTaskCreate(tskProducer, "Producer", STACK_SIZE, &ConsTaskHandle, tskIDLE_PRIORITY+1, &ProdTaskHandle);
 	xTaskCreate(tskConsumer, "Consumer", STACK_SIZE, &ProdTaskHandle, tskIDLE_PRIORITY+1, &ConsTaskHandle);

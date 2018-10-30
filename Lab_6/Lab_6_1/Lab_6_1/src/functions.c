@@ -11,6 +11,9 @@ const int bport[3] = {BUTTON_PORT0,BUTTON_PORT1,BUTTON_PORT2};
 const int bpin[3] = {BUTTON_PIN0,BUTTON_PIN1,BUTTON_PIN2};
 const int lport[3] = {LED0_PORT,LED1_PORT,LED2_PORT};
 const int lbit[3] = {LED0_BIT_VALUE,LED1_BIT_VALUE,LED2_BIT_VALUE};
+int buffer = 0; 
+xSemaphoreHandle fillCount; // items produced
+xSemaphoreHandle emptyCount; // remaining space
 
 void USART_init(void)
 {
@@ -49,7 +52,7 @@ void LED_init(void)
 		led->ovrs = lbit[i];
 		led->oders = lbit[i];
 	}
-	vWriteLine("All LED:s Initialized\n");
+	vWriteLine("LED:s Initialized\n");
 }
 
 void vWriteLine(char* str){
@@ -58,10 +61,55 @@ void vWriteLine(char* str){
 	taskEXIT_CRITICAL();
 }
 
-void tskProducer(void* ptr){
-	while(TRUE);
+void initSemaphore(void){
+	fillCount = xSemaphoreCreateCounting(BUFFER_SIZE,0);
+	emptyCount = xSemaphoreCreateCounting(BUFFER_SIZE,BUFFER_SIZE);
 }
 
-void tskConsumer(void* ptr){
-	while(TRUE);
+void tskProducer(void* ptr)
+{	
+	int byte = 0;
+	xTaskHandle* ConsTaskHandle = *(xTaskHandle*)ptr;
+	
+	while(TRUE){
+		/* Solution */
+		
+		byte = 1; // Produce byte
+		vWriteLine("P: +1\n");
+		//xSemaphoreTake(emptyCount,portMAX_DELAY);
+		if(buffer>BUFFER_SIZE-1){
+			vWriteLine("P: Buffer full, going to sleep\n");
+			vTaskSuspend(NULL);
+			vWriteLine("P: Awake\n");
+		}
+		buffer += byte; // Store byte in buffer
+		//xSemaphoreGive(fillCount);
+		byte = 0;
+		if(buffer == 1)vTaskResume(ConsTaskHandle);
+		
+		/* Solution */
+
+	}
+}
+
+void tskConsumer(void* ptr)
+{
+	int byte = 0;
+	xTaskHandle *ProdTaskHandle = *(xTaskHandle*)ptr;
+	while(TRUE){
+		if(buffer == 0){
+			vWriteLine("C: Buffer empty, going to sleep\n");
+			vTaskSuspend(NULL);
+			vWriteLine("C: Awake\n");
+		}
+		byte = 1; // Remove byte from buffer
+		//xSemaphoreTake(fillCount,portMAX_DELAY);
+		buffer -= byte;
+		vWriteLine("C: -1\n");
+		if(buffer == BUFFER_SIZE-1)vTaskResume(ProdTaskHandle);
+		//xSemaphoreGive(emptyCount);
+		byte = 0; // Consume byte
+		
+
+	}
 }
