@@ -12,7 +12,13 @@ int main(void){
 	xTaskHandle *ProdTaskHandle;
 	xTaskHandle *ConsTaskHandle;
 	
-	xTaskCreate(tskProducer, "Producer", 256, &ConsumerTaskHandle, STACK_SIZE, &ProdTaskHandle);
-	xTaskCreate(tskConsumer, "Consumer", 256, &ProducerTaskHandle, tskIDLE_PRIORITY, &ConsTaskHandle);
+	USART_init();
+	LED_init();
 	
+	xTaskCreate(tskProducer, "Producer", STACK_SIZE, &ConsTaskHandle, tskIDLE_PRIORITY+1, &ProdTaskHandle);
+	xTaskCreate(tskConsumer, "Consumer", STACK_SIZE, &ProdTaskHandle, tskIDLE_PRIORITY+1, &ConsTaskHandle);
+	
+	vTaskStartScheduler();
+
+	while(TRUE);
 }
