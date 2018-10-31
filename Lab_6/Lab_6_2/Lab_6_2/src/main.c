@@ -8,16 +8,13 @@
 #include "define.h"
 
 int main(void){
-	
-	xTaskHandle *ProdTaskHandle;
-	xTaskHandle *ConsTaskHandle;
-	//test
+
 	USART_init();
-	LED_init();
 	initSemaphore();
-	
-	xTaskCreate(tskProducer, "Producer", STACK_SIZE, &ConsTaskHandle, tskIDLE_PRIORITY+1, &ProdTaskHandle);
-	xTaskCreate(tskConsumer, "Consumer", STACK_SIZE, &ProdTaskHandle, tskIDLE_PRIORITY+1, &ConsTaskHandle);
+	display_init();
+	xTaskCreate(tskReceiver, "RECITSK", STACK_SIZE, NULL, tskIDLE_PRIORITY+1,NULL);
+	xTaskCreate(tskStatus, "STATUSTSK", STACK_SIZE, NULL, tskIDLE_PRIORITY+1,NULL);
+	xTaskCreate(tskButton, "BUTTONTSK", STACK_SIZE, NULL, tskIDLE_PRIORITY+1,NULL);
 	
 	vTaskStartScheduler();
 

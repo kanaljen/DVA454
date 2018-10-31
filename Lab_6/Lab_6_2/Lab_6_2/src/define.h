@@ -20,23 +20,13 @@
 #include "gpio.h"
 #include "semphr.h"
 #include "stdio.h"
+#include "display_init.h"
 
 #define TRUE 1
 #define FALSE 0
 #define STACK_SIZE configMINIMAL_STACK_SIZE
 #define GPIO_MAX_PIN_NUMBER 32
 #define BUFFER_SIZE 10
-
-/* LEDS */
-#define LED0_PORT ( LED0_GPIO / GPIO_MAX_PIN_NUMBER )
-#define LED0_PIN ( LED0_GPIO & ( GPIO_MAX_PIN_NUMBER -1))
-#define LED0_BIT_VALUE (1 << LED0_PIN )
-#define LED1_PORT ( LED1_GPIO / GPIO_MAX_PIN_NUMBER )
-#define LED1_PIN ( LED1_GPIO & ( GPIO_MAX_PIN_NUMBER -1))
-#define LED1_BIT_VALUE (1 << LED1_PIN )
-#define LED2_PORT ( LED2_GPIO / GPIO_MAX_PIN_NUMBER )
-#define LED2_PIN ( LED2_GPIO & ( GPIO_MAX_PIN_NUMBER -1))
-#define LED2_BIT_VALUE (1 << LED2_PIN )
 
 /* BUTTONS */
 #define BUTTON_PORT0 (GPIO_PUSH_BUTTON_0 >> 5)
@@ -68,8 +58,9 @@ void USART_init(void);
 void LED_init(void);
 void vWriteLine(char* str);
 void initSemaphore(void);
-void tskProducer(void* ptr);
-void tskConsumer(void* ptr);
+void tskReceiver(void* ptr);
+void tskStatus(void* ptr);
+void tskButton(void* ptr);
 
 
 #endif /* DEFINE_H_ */
