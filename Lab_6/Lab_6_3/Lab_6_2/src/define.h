@@ -9,24 +9,25 @@
 #ifndef DEFINE_H_
 #define DEFINE_H_
 
-#include "avr32\usart_400.h"
-#include "avr32\uc3a0512.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "board.h"
-#include "compiler.h"
-#include "pm.h"
+#include "LED.h"
 #include "usart.h"
 #include "gpio.h"
+#include "pm.h"
 #include "semphr.h"
-#include "stdio.h"
+#include "queue.h"
 #include "display_init.h"
+#include <string.h>
+#include <stdio.h>
+#include "adc.h"
+#include "board.h"
 
 #define TRUE 1
 #define FALSE 0
 #define STACK_SIZE configMINIMAL_STACK_SIZE
 #define GPIO_MAX_PIN_NUMBER 32
-#define BUFFER_SIZE 10
+#define BUFFER_SIZE 1
 
 /* BUTTONS */
 #define BUTTON_PORT0 (GPIO_PUSH_BUTTON_0 >> 5)
@@ -58,9 +59,11 @@ void USART_init(void);
 void LED_init(void);
 void vWriteLine(char* str);
 void initSemaphore(void);
-void tskReceiver(void* ptr);
-void tskStatus(void* ptr);
-void tskButton(void* ptr);
+void initQueues(void);
+void tskLight(void* ptr);
+void tskPotent(void* ptr);
+void tskTemp(void* ptr);
+void tskDisplay(void* ptr);
 
 
 #endif /* DEFINE_H_ */

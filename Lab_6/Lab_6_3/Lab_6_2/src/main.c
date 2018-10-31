@@ -12,9 +12,18 @@ int main(void){
 	USART_init();
 	initSemaphore();
 	display_init();
-	xTaskCreate(tskReceiver, "RECITSK", STACK_SIZE, NULL, tskIDLE_PRIORITY+1,NULL);
-	xTaskCreate(tskStatus, "STATUSTSK", STACK_SIZE, NULL, tskIDLE_PRIORITY+1,NULL);
-	xTaskCreate(tskButton, "BUTTONTSK", STACK_SIZE, NULL, tskIDLE_PRIORITY+1,NULL);
+	initQueues();
+	
+   // Configure the ADC module and enable the channels
+   adc_configure(&AVR32_ADC);
+   adc_enable(&AVR32_ADC, ADC_POTENTIOMETER_CHANNEL);
+   adc_enable(&AVR32_ADC, ADC_TEMPERATURE_CHANNEL);
+   adc_enable(&AVR32_ADC, ADC_LIGHT_CHANNEL);
+	
+	xTaskCreate(tskLight, "LIGHTTSK", STACK_SIZE, NULL, tskIDLE_PRIORITY+1,NULL);
+	xTaskCreate(tskPotent, "POTENTTSK", STACK_SIZE, NULL, tskIDLE_PRIORITY+1,NULL);
+	xTaskCreate(tskTemp, "TEMPTSK", STACK_SIZE, NULL, tskIDLE_PRIORITY+1,NULL);
+	xTaskCreate(tskDisplay, "DISPTSK", STACK_SIZE, NULL, tskIDLE_PRIORITY+1,NULL);
 	
 	vTaskStartScheduler();
 

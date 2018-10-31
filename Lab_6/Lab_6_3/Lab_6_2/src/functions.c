@@ -9,11 +9,12 @@
 
 const int bport[3] = {BUTTON_PORT0,BUTTON_PORT1,BUTTON_PORT2};
 const int bpin[3] = {BUTTON_PIN0,BUTTON_PIN1,BUTTON_PIN2};
-xSemaphoreHandle fillCount;			// items produced
-xSemaphoreHandle emptyCount;		// remaining space
-xSemaphoreHandle WriteToDisplay;	// display
-int total_chars = 0;
-int status = FALSE;
+xSemaphoreHandle SemPot;
+xSemaphoreHandle SemTemp;
+xSemaphoreHandle SemLight;
+xQueueHandle PotentQueue;
+xQueueHandle TempQueue;
+xQueueHandle LightQueue;
 
 void USART_init(void)
 {
@@ -51,65 +52,116 @@ void vWriteLine(char* str){
 }
 
 void initSemaphore(void){
-	fillCount = xSemaphoreCreateCounting(BUFFER_SIZE,0);
-	emptyCount = xSemaphoreCreateCounting(BUFFER_SIZE,BUFFER_SIZE);
-	vSemaphoreCreateBinary(WriteToDisplay);
+	vSemaphoreCreateBinary(SemPot);
+	vSemaphoreCreateBinary(SemTemp);
+	vSemaphoreCreateBinary(SemLight);
 }
 
-void tskReceiver(void* ptr)
-{
-	char c;
-	if(xSemaphoreTake(WriteToDisplay,portMAX_DELAY));
-	dip204_set_cursor_position(1,1);
-	dip204_write_string("Received: ");
-	xSemaphoreGive(WriteToDisplay);
-
-	while(TRUE){
-		c = usart_getchar(configDBG_USART);
-		if(c!=NULL)total_chars += 1;
-		if(xSemaphoreTake(WriteToDisplay,portMAX_DELAY));
-		dip204_set_cursor_position(11,1);
-		dip204_write_data(c);
-		xSemaphoreGive(WriteToDisplay);
-		vTaskDelay(10);
-	}	
+void initQueues(void){
+	PotentQueue = xQueueCreate(BUFFER_SIZE, sizeof(uint32_t));
+	TempQueue = xQueueCreate(BUFFER_SIZE, sizeof(uint32_t));
+	LightQueue = xQueueCreate(BUFFER_SIZE, sizeof(uint32_t));
 }
 
-void tskStatus(void* ptr)
+void tskLight(void* ptr)
 {
-	if(xSemaphoreTake(WriteToDisplay,portMAX_DELAY));
-
-	xSemaphoreGive(WriteToDisplay);
+	volatile uint32_t light_value = 0;
 	
-	while(TRUE){
-		if(status == TRUE){
-			if(xSemaphoreTake(WriteToDisplay,portMAX_DELAY));
-			dip204_set_cursor_position(1,2);
-			dip204_write_string("Total: ");
-			dip204_set_cursor_position(8,2);
-			dip204_write_data('0'+(total_chars/100));
-			dip204_set_cursor_position(9,2);
-			dip204_write_data('0'+(total_chars/10)%10);
-			dip204_set_cursor_position(10,2);
-			dip204_write_data('0'+(total_chars%10));
-			xSemaphoreGive(WriteToDisplay);
+	while(TRUE)
+	{
+		// Start a ADC sampling of all active channels
+		adc_start(&AVR32_ADC);
+
+		// Get value
+		light_value = adc_get_value(&AVR32_ADC, ADC_LIGHT_CHANNEL);
+
+		// Send to Queue
+		if(xSemaphoreTake(SemLight,10)){
+			xQueueSendToBack(LightQueue,&light_value,10);
+			xSemaphoreGive(SemLight);
 		}
-		vTaskDelay(10);
+		vTaskDelay(100);
+
 	}
 }
 
-void tskButton(void* ptr)
-{
-	while(TRUE){
-		vTaskDelay(10);
-		if(!(AVR32_GPIO.port[BUTTON_PORT0].pvr & bpin[BUTTON_PIN0])){
-			status = TRUE;
-			vTaskDelay(10000);
-			status = FALSE;
-			if(xSemaphoreTake(WriteToDisplay,portMAX_DELAY));
-			dip204_set_cursor_position(1,2);
-			dip204_write_string("                    ");
-			xSemaphoreGive(WriteToDisplay);
+void tskPotent(void* ptr)
+{	
+	volatile uint32_t pot_value = 0;
+	
+	while(TRUE)
+	{
+		// Start a ADC sampling of all active channels
+		adc_start(&AVR32_ADC);
+
+		// Get value
+		pot_value = adc_get_value(&AVR32_ADC, ADC_POTENTIOMETER_CHANNEL);
+		
+		// Send to Queue
+		if(xSemaphoreTake(SemPot,10)){
+			xQueueSendToBack(PotentQueue,&pot_value,10);
+			xSemaphoreGive(SemPot);
 		}
+		vTaskDelay(100);
+	}
+
+}
+
+void tskTemp(void* ptr)
+{
+	volatile uint32_t temp_value = 0;
+	
+	while(TRUE)
+	{
+		// Start a ADC sampling of all active channels
+		adc_start(&AVR32_ADC);
+
+		// Value
+		temp_value = adc_get_value(&AVR32_ADC, ADC_TEMPERATURE_CHANNEL);
+		
+		// Send to Queue
+		if(xSemaphoreTake(SemTemp,10)){
+			xQueueSendToBack(TempQueue,&temp_value,10);
+			xSemaphoreGive(SemTemp);
+		}
+		vTaskDelay(100);
+
+	}
+
+}
+
+void tskDisplay(void* ptr){
+	
+	volatile uint32_t values[3] = {0,0,0}; // pot_value = 0, temp_value = 0, light_value = 0
+	dip204_set_cursor_position(1,1);
+	dip204_write_string("Potent:");
+	dip204_set_cursor_position(1,2);
+	dip204_write_string("Temp:");
+	dip204_set_cursor_position(1,3);
+	dip204_write_string("Light:");
+	while(TRUE){
+		if(xSemaphoreTake(SemPot,10)){
+			xQueueReceive(PotentQueue, &values[0],10);
+			xSemaphoreGive(SemPot);			
+		}
+		if(xSemaphoreTake(SemTemp,10)){
+			xQueueReceive(TempQueue, &values[1],10);
+			xSemaphoreGive(SemTemp);
+		}
+		if(xSemaphoreTake(SemLight,10)){
+			xQueueReceive(LightQueue, &values[2],10);
+			xSemaphoreGive(SemLight);
+		}
+		for(int i = 0; i < 3;i++){
+			dip204_set_cursor_position(8,i+1);
+			dip204_write_data('0'+(values[i]/1000));
+			dip204_set_cursor_position(9,i+1);
+			dip204_write_data('0'+(values[i]/100)%10);
+			dip204_set_cursor_position(10,i+1);
+			dip204_write_data('0'+(values[i]/10)%10);
+			dip204_set_cursor_position(11,i+1);
+			dip204_write_data('0'+(values[i]%10));
+		}
+		vTaskDelay(10);
 	}
 }
