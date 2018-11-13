@@ -1,11 +1,3 @@
-/*
- * USART_driver.h
- *
- * Created: 2018-11-13 14:55:02
- *  Author: sbn14007
- */ 
-
-
 #ifndef USART_DRIVER_H_
 #define USART_DRIVER_H_
 
@@ -21,4 +13,6 @@ void USART_putChar(char c); // Writes char to THR
 void USART_reset(); // Resets CR and MR
 USART_getString(char input_string[]); // Reads a string from RHR
 void USART_putString(char output_string[]); // Writes a string to THR
+void USART_putInt(int number); // Writes an integer
+void USART_put2Int(int number); // Writes an integer in 2 characters only
 #endif /* USART_DRIVER_H_ */

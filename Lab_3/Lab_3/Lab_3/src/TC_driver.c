@@ -1,41 +1,26 @@
-/*
- * TC_driver.c
- *
- * Created: 2018-11-13 14:50:03
- *  Author: sbn14007
- */ 
-
 #include "TC_driver.h"
+#include "USART_driver.h"
+
+int inter = 0;
+
+// Interrupt function. Counts a global variable once in every interrupt (Every 0.01 second)
+__attribute__((__interrupt__))static void tc_irq_handler(void)
+{
+	inter++;
+	
+	USART_putInt(inter);
+
+	// Clear the interrupt flag
+	tc_read_sr(&AVR32_TC, TC_CHANNEL);
+}
 
 void tc_init(volatile avr32_tc_t *tc)
 {
-	// Options for waveform generation.
+	// Struct with waveform options for the TC
 	static const tc_waveform_opt_t waveform_opt = {
-		// Channel selection.
+		// Select channel
 		.channel  = TC_CHANNEL,
-		// Software trigger effect on TIOB.
-		.bswtrg   = TC_EVT_EFFECT_NOOP,
-		// External event effect on TIOB.
-		.beevt    = TC_EVT_EFFECT_NOOP,
-		// RC compare effect on TIOB.
-		.bcpc     = TC_EVT_EFFECT_NOOP,
-		// RB compare effect on TIOB.
-		.bcpb     = TC_EVT_EFFECT_NOOP,
-		// Software trigger effect on TIOA.
-		.aswtrg   = TC_EVT_EFFECT_NOOP,
-		// External event effect on TIOA.
-		.aeevt    = TC_EVT_EFFECT_NOOP,
-		// RC compare effect on TIOA.
-		.acpc     = TC_EVT_EFFECT_NOOP,
-		/*
-		 * RA compare effect on TIOA.
-		 * (other possibilities are none, set and clear).
-		 */
-		.acpa     = TC_EVT_EFFECT_NOOP,
-		/*
-		 * Waveform selection: Up mode with automatic trigger(reset)
-		 * on RC compare.
-		 */
+		// Selects type of timer and interrupt
 		.wavsel   = TC_WAVEFORM_SEL_UP_MODE_RC_TRIGGER,
 		// External event trigger enable.
 		.enetrg   = false,
@@ -55,29 +40,21 @@ void tc_init(volatile avr32_tc_t *tc)
 		.tcclks   = TC_CLOCK_SOURCE_TC3
 	};
 
-	// Options for enabling TC interrupts
+	// Struct containing interrupt options
 	static const tc_interrupt_t tc_interrupt = {
-		.etrgs = 0,
-		.ldrbs = 0,
-		.ldras = 0,
 		.cpcs  = 1, // Enable interrupt on RC compare alone
-		.cpbs  = 0,
-		.cpas  = 0,
-		.lovrs = 0,
-		.covfs = 0
 	};
 	// Initialize the timer/counter.
 	tc_init_waveform(tc, &waveform_opt);
-
-	/*
-	 * Set the compare triggers.
-	 * We configure it to count every 1 milliseconds.
-	 * We want: (1 / (fPBA / 8)) * RC = 1 ms, hence RC = (fPBA / 8) / 1000
-	 * to get an interrupt every 10 ms.
-	 */
-	//tc_write_rc(tc, TC_CHANNEL, (115200 / 8 / 1000));
-	// configure the timer interrupt
-	//tc_configure_interrupts(tc, TC_CHANNEL, &tc_interrupt);
+	// Set trigger to every 10ms, Rc = (115200/8) / 100 = 144
+	tc_write_rc(tc, TC_CHANNEL, (115200 / 8 / 100));
+	// Configure the timer interrupt
+	tc_configure_interrupts(tc, TC_CHANNEL, &tc_interrupt);
 	// Start the timer/counter.
 	tc_start(tc, TC_CHANNEL);
+	//Disable the interrupts
+	Disable_global_interrupt();
+	//Register the RTC interrupt handler to the interrupt controller.
+	INTC_init_interrupts();
+	INTC_register_interrupt(&tc_irq_handler, AVR32_TC_IRQ0, AVR32_INTC_INT0);
 }
